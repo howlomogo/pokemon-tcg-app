@@ -86,56 +86,65 @@ export const getFilteredCards = async (
   rarity: string
 ) => {
   try {
-    // let cardQuery = Query.create()
-    //   .sort('localId', 'ASC')
-    //   .paginate(1, 20);
+    console.log('--Filter triggered')
+    let cardQuery = Query.create()
+      .sort('localId', 'ASC')
+      .paginate(1, 30);
 
-    // if (name) {
-    //   cardQuery = cardQuery.contains('name', name.trim());
-    // }
+    if (name) {
+      cardQuery = cardQuery.contains('name', name.trim());
+    }
 
-    // if (category && category !== 'all') {
-    //   cardQuery = cardQuery.equal('category', category);
-    // }
+    if (category && category !== 'All') {
+      cardQuery = cardQuery.equal('category', category);
+    }
 
-    // if (rarity && rarity.length > 0) {
-    //   cardQuery = cardQuery.equal('rarity', rarity); 
-    // }
+    if (rarity && rarity.length > 0) {
+      cardQuery = cardQuery.equal('rarity', rarity); 
+    }
 
-    // return await tcgdex.card.list(cardQuery);
+    return await tcgdex.card.list(cardQuery);
 
-    console.log('---rarity')
-    console.log(rarity)
-
-
-    return await tcgdex.card.list(
-      Query.create()
-        .contains('name', name)
-        .equal('category', category)
-        .equal('rarity', rarity)
-        .sort('localId', 'ASC')
-        .paginate(1,20)
-    );
   } catch (error) {
     handleServiceError(error, "Failed to load card data.");
   }
 };
 
+// ==========================================
+// FILTER PROPERTIES
+// ==========================================
 
-
-// Fetch all PickachuCards
-export const getPikachuCards = async () => {
+export const getFilterProperties = async () => {
   try {
-    return await tcgdex.card.list(
-      Query.create()
-        .equal('name', 'Pikachu')
-        .greaterOrEqualThan('hp', 60)
-        .lesserThan('hp', 70)
-        .sort('localId', 'ASC')
-        .paginate(1,50)
-    );
+  // Returns: ['Colorless', 'Darkness', 'Dragon', 'Fairy', 'Fighting', ...]
+  const types = await tcgdex.fetch('types');
+  
+  // Returns: ['Energy', 'Trainer', 'Pokemon']
+  const categories = await tcgdex.fetch('categories');
 
+  // Returns: Object array containing set details i.e
+  // {
+  //     "id": "base1",
+  //     "name": "Base Set",
+  //     "logo": "https://assets.tcgdex.net/en/base/base1/logo",
+  //     "cardCount": {
+  //         "total": 102,
+  //         "official": 102
+  //     }
+  // }
+  const sets = await tcgdex.fetch('sets');
+
+  // Returns: ['Common', 'Uncommon', 'Rare', 'Ultra Rare', ...]
+  const rarities = await tcgdex.fetch('rarities');
+
+  // Returns: ['Basic', 'Stage 1', 'Stage 2', 'MEGA', ...]
+  const stages = await tcgdex.fetch('stages');
+
+  // Returns: [30, 40, 50, 60, ..., 340]
+  const hpTiers = await tcgdex.fetch('hp');
+
+  return { types, categories, sets, rarities, stages, hpTiers };
   } catch (error) {
-    handleServiceError(error, "Failed to load card data.");
+    handleServiceError(error, "Failed to filter properties.");
   }
-};
+}

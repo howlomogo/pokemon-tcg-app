@@ -1,4 +1,5 @@
-import React, { type ChangeEvent } from 'react';
+import React, { useEffect, useState, type ChangeEvent } from 'react';
+import { getFilterProperties } from '../services/tcgdex';
 
 // Export types so your parent component can reuse them safely
 export type PokemonCategory = 'All' | 'Pokemon' | 'Energy' | 'Trainer';
@@ -17,6 +18,35 @@ interface PokemonFilterProps {
 }
 
 export const Filters: React.FC<PokemonFilterProps> = ({ filters, onFilterChange }) => {
+  const [filterProperties, setFilterProperties] = useState<any>();
+
+  useEffect(() => {
+    // setLoading(true);
+    // setError(null);
+
+    const fetchFilterProperties = async () => {
+      try {
+        const data = await getFilterProperties()
+
+        setFilterProperties(data)
+      } catch (err: unknown) {
+        // Handle the error
+      } finally {
+        // setLoading(false);
+      }
+    }
+
+    fetchFilterProperties();
+  }, []);
+
+  useEffect(() => {
+    console.log('---filterProperties')
+    console.log(filterProperties)
+  }, [filterProperties])
+
+
+
+
   
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     onFilterChange({ ...filters, search: e.target.value });
@@ -34,7 +64,7 @@ export const Filters: React.FC<PokemonFilterProps> = ({ filters, onFilterChange 
     onFilterChange({
       search: '',
       category: 'All',
-      rarity: 'None',
+      rarity: 'Common',
     });
   };
 

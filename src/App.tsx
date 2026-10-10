@@ -30,7 +30,7 @@ export default function App() {
   const [filterState, setFilterState] = useState<FilterState>({
     search: '',
     category: 'All',
-    rarity: 'None',
+    rarity: 'Common',
   });
 
   // 
