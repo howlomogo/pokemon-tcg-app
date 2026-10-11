@@ -110,6 +110,36 @@ export const getFilteredCards = async (
   }
 };
 
+export type CardSearchOptions = {
+  name?: string;
+  categories?: string;
+  rarities?: string[];
+  page?: number;
+  limit?: number;
+};
+
+// 2. Create a clean utility wrapper
+export const searchCards = async (options: CardSearchOptions) => {
+  let cardQuery = Query.create()
+    .sort('localId', 'ASC')
+    .paginate(options.page || 1, options.limit || 30);
+
+  if (options.name?.trim()) {
+    cardQuery = cardQuery.contains('name', options.name.trim());
+  }
+
+  // If the category is All we don't want to add this filter to the query
+  if (options.categories && options.categories !== "All") {
+    cardQuery = cardQuery.equal('category', options.categories);
+  }
+
+  if (options.rarities && options.rarities.length > 0) {
+    cardQuery = cardQuery.equal('rarity', options.rarities.join('|'));
+  }
+
+  return await tcgdex.card.list(cardQuery);
+}
+
 // ==========================================
 // FILTER PROPERTIES
 // ==========================================
@@ -143,7 +173,8 @@ export const getFilterProperties = async () => {
   // Returns: [30, 40, 50, 60, ..., 340]
   const hpTiers = await tcgdex.fetch('hp');
 
-  return { types, categories, sets, rarities, stages, hpTiers };
+  return { types, categories, rarities, hpTiers };
+
   } catch (error) {
     handleServiceError(error, "Failed to filter properties.");
   }

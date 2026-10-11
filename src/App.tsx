@@ -3,7 +3,7 @@ import type { SetList, SerieList, Set } from '@tcgdex/sdk';
 import type { CardBrief } from './types/pokemon';
 import CardGrid from './components/CardGrid';
 import StorageActions from './components/StorageActions';
-import { getAll, getSerie, getFilteredCards } from './services/tcgdex';
+import { getAll, getSerie, getFilteredCards, searchCards } from './services/tcgdex';
 import { Filters, type FilterState } from './components/Filters';
 
 export default function App() {
@@ -30,7 +30,7 @@ export default function App() {
   const [filterState, setFilterState] = useState<FilterState>({
     search: '',
     category: 'All',
-    rarity: 'Common',
+    rarity: ['Common'],
   });
 
   // 
@@ -39,23 +39,25 @@ export default function App() {
       setLoading(true)
       setError(null)
 
+      console.log('FETCH CATFS')
+      console.log(filterState.category)
+
       try {
-        const data = await getFilteredCards(
-          filterState.search,
-          filterState.category,
-          filterState.rarity
-        );
+        const data = await searchCards({
+          name: filterState.search,
+          categories: filterState.category,
+          rarities: filterState.rarity,
+          page: 1,
+          limit: 30,
+        });
 
-      if(data?.length) {
-          setAllCards(data);
-      }
+        console.log('---data')
+        console.log(data)
 
+        setAllCards(data ? data : []);
 
-      console.log('---fetchFilteredPokemon')
-      console.log(data)
-        
         // Handle your API state updates here...
-        console.log('Filtered Cards:', data);
+        // console.log('Filtered Cards:', data);
       } catch (err: unknown) {
         handleServiceError(err);
       } finally {
@@ -67,28 +69,6 @@ export default function App() {
     // so rapid keystrokes on the search text-field don't flood your server.
     fetchFilteredPokemon();
   }, [filterState]);
-
-  // Test fetching all cards from a series
-  // const handleGetFilteredCards = async () => {
-  //   setLoading(true);
-  //   setError(null);
-
-  //   try {
-  //     const data = await getFilteredCards('Charmander', 'Pokemon', 'Common');
-
-  //     if(data?.length) {
-  //         setAllCards(data);
-  //     }
-
-  //     console.log('---handleFetchFromSeries')
-  //     console.log(data)
-
-  //   } catch (err: unknown) {
-  //     handleServiceError(err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
 
 
 
@@ -118,7 +98,7 @@ export default function App() {
           setError("No Pokémon cards found in the database.");
         } else {
           setAllCards(data);
-          console.log(data)
+          // console.log(data)
         }
       } catch (err: unknown) {
         handleServiceError(err);
@@ -138,8 +118,8 @@ export default function App() {
     try {
       const data = await getSerie(seriesId);
 
-      console.log('---handleFetchFromSeries')
-      console.log(data?.sets)
+      // console.log('---handleFetchFromSeries')
+      // console.log(data?.sets)
 
     } catch (err: unknown) {
       handleServiceError(err);
@@ -160,8 +140,8 @@ export default function App() {
           setAllCards(data);
       }
 
-      console.log('---handleFetchFromSeries')
-      console.log(data)
+      // console.log('---handleFetchFromSeries')
+      // console.log(data)
 
     } catch (err: unknown) {
       handleServiceError(err);
@@ -174,6 +154,32 @@ export default function App() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <button 
+        onClick={async () => {
+          try {
+            const results = await searchCards({
+              name: 'Pikachu',
+              categories: 'Pokemon',
+              rarities: ['Ultra Rare', 'Common'],
+              page: 1,
+              limit: 30
+            });
+            
+            // console.log('Cards fetched successfully:', results);
+            // TODO: Save 'results' to your component's state here!
+
+                      setAllCards(results);
+
+            
+          } catch (error) {
+            console.error('Failed to search cards:', error);
+          }
+        }}
+      >
+        Search Cards
+      </button>
+
+
       <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-6 border-b border-neutral-800">
         <div>
           {error && (
