@@ -37,7 +37,7 @@ export default function StorageActions({ binderIds, setBinderIds }: StorageActio
         } else {
           alert("Error: File format is invalid.");
         }
-      } catch (err) {
+      } catch {
         alert("Error parsing backup JSON file.");
       }
     };

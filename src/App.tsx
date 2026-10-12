@@ -1,248 +1,134 @@
-import { useState, useEffect } from 'react';
-import type { SetList, SerieList, Set } from '@tcgdex/sdk';
-import type { CardBrief } from './types/pokemon';
-import CardGrid from './components/CardGrid';
+import { useEffect, useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import StorageActions from './components/StorageActions';
-import { getAll, getSerie, getFilteredCards, searchCards } from './services/tcgdex';
-import { Filters, type FilterState } from './components/Filters';
+import { NotFound } from './components/shared';
+import CardDetails from './pages/CardDetails';
+import CollectionPage from './pages/CollectionPage';
+import HomePage from './pages/HomePage';
+import SeriesDirectory from './pages/SeriesDirectory';
+import SeriesPage from './pages/SeriesPage';
+import SetPage from './pages/SetPage';
+import { getAllSeries } from './services/tcgdex';
+import type { SerieList } from '@tcgdex/sdk';
 
 export default function App() {
+  const { pathname } = useLocation();
   const [binderIds, setBinderIds] = useState<string[]>([]);
-  const [allCards, setAllCards] = useState<CardBrief[]>([]);
-  
-  const [view, setView] = useState<'search' | 'binder'>('search');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [allSets, setAllSets] = useState<SetList | null>(null);
-  const [allSeries, setAllSeries] = useState<SerieList | null>(null);
+  const [series, setSeries] = useState<SerieList>([]);
+  const [seriesLoading, setSeriesLoading] = useState(true);
+  const [seriesError, setSeriesError] = useState<string | null>(null);
 
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [setData, setSetData] = useState<Set | null>(null);
-
-  // Filters
-  const [cardName, setCardName] = useState<string>('');
-  const [cardCategory, setCardCategory] = useState<string>('');
-  const [cardRarity, setCardRarity] = useState<string>('');
-
-
-  const [filterState, setFilterState] = useState<FilterState>({
-    search: '',
-    category: 'All',
-    rarity: ['Common'],
-  });
-
-  // 
   useEffect(() => {
-    const fetchFilteredPokemon = async () => {
-      setLoading(true)
-      setError(null)
+    if ((pathname !== '/' && pathname !== '/series') || series.length > 0) return;
 
-      console.log('FETCH CATFS')
-      console.log(filterState.category)
+    let isMounted = true;
 
+    const loadSeries = async () => {
       try {
-        const data = await searchCards({
-          name: filterState.search,
-          categories: filterState.category,
-          rarities: filterState.rarity,
-          page: 1,
-          limit: 30,
-        });
+        const data = await getAllSeries();
+        if (!isMounted) return;
 
-        console.log('---data')
-        console.log(data)
+        if (!data?.length) {
+          setSeries([]);
+          setSeriesError('No series were found. Please try again later.');
+          return;
+        }
 
-        setAllCards(data ? data : []);
-
-        // Handle your API state updates here...
-        // console.log('Filtered Cards:', data);
-      } catch (err: unknown) {
-        handleServiceError(err);
+        setSeries(data);
+      } catch (error) {
+        if (isMounted) {
+          setSeriesError(error instanceof Error ? error.message : 'Unable to load series.');
+        }
       } finally {
-        setLoading(false)
+        if (isMounted) setSeriesLoading(false);
       }
     };
 
-    // Optional: You could wrap this function in a debounce hook 
-    // so rapid keystrokes on the search text-field don't flood your server.
-    fetchFilteredPokemon();
-  }, [filterState]);
+    void loadSeries();
 
-
-
-
-
-  const handleServiceError = (err: unknown) => {
-    if (err instanceof Error) {
-      setError(err.message);
-    } else {
-      setError("An unexpected interface error occurred.");
-    }
-  }
-
-  // Initial Data Fetching: Load All Cards on App Mount
-  useEffect(() => {
-    let isMounted = true;
-
-    setLoading(true);
-    setError(null);
-
-    // declare the data fetching function
-    const fetchData = async () => {
-      try {
-        const data = await getAll(1, 20);
-        if (!isMounted) return; 
-        if (!data || (Array.isArray(data) && data.length === 0)) {
-          setError("No Pokémon cards found in the database.");
-        } else {
-          setAllCards(data);
-          // console.log(data)
-        }
-      } catch (err: unknown) {
-        handleServiceError(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  // Test fetching all cards from a series
-  const handleFetchFromSeries = async (seriesId: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await getSerie(seriesId);
-
-      // console.log('---handleFetchFromSeries')
-      // console.log(data?.sets)
-
-    } catch (err: unknown) {
-      handleServiceError(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Test fetching all cards from a series
-  const handleGetFilteredCards = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await getFilteredCards('Charmander', 'Pokemon', 'Common');
-
-      if(data?.length) {
-          setAllCards(data);
-      }
-
-      // console.log('---handleFetchFromSeries')
-      // console.log(data)
-
-    } catch (err: unknown) {
-      handleServiceError(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const binderCards = allCards.filter(card => binderIds.includes(card.id));
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname, series.length]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <button 
-        onClick={async () => {
-          try {
-            const results = await searchCards({
-              name: 'Pikachu',
-              categories: 'Pokemon',
-              rarities: ['Ultra Rare', 'Common'],
-              page: 1,
-              limit: 30
-            });
-            
-            // console.log('Cards fetched successfully:', results);
-            // TODO: Save 'results' to your component's state here!
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-5 border-b border-neutral-800 pb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-5">
+            <Link to="/" className="flex items-center gap-3" aria-label="PokéBinder Studio home">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-400 text-neutral-950">
+                <Sparkles size={22} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xl font-extrabold tracking-tight">
+                  PokéBinder <span className="font-medium text-neutral-400">Studio</span>
+                </p>
+                <p className="mt-0.5 text-sm text-neutral-400">Explore the Pokémon TCG collection</p>
+              </div>
+            </Link>
+            <nav aria-label="Main navigation" className="flex items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-1">
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    isActive ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:text-white'
+                  }`
+                }
+              >
+                Home
+              </NavLink>
+              <NavLink
+                to="/series"
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    isActive ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:text-white'
+                  }`
+                }
+              >
+                Series
+              </NavLink>
+              <NavLink
+                to="/collection"
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    isActive ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:text-white'
+                  }`
+                }
+              >
+                Collection
+              </NavLink>
+            </nav>
+          </div>
+          <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
+        </header>
 
-                      setAllCards(results);
-
-            
-          } catch (error) {
-            console.error('Failed to search cards:', error);
-          }
-        }}
-      >
-        Search Cards
-      </button>
-
-
-      <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-6 border-b border-neutral-800">
-        <div>
-          {error && (
-            
-           <h1>ERROR</h1>
-        )}
-          <h1></h1>
-          <h1 className="text-3xl font-extrabold tracking-tight text-amber-400">
-            ⚡ PokéBinder <span className="text-white font-medium text-2xl">Studio</span>
-          </h1>
-          <p className="text-sm text-neutral-400 mt-1">Manage your collection using TS + Client Storage.</p>
-        </div>
-        <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
-      </header>
-
-      <nav className="flex gap-2 my-6 bg-neutral-900 p-1.5 rounded-lg max-w-sm">
-        <button 
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${view === 'search' ? 'bg-blue-600 text-white shadow-md' : 'text-neutral-400 hover:text-white'}`} 
-          onClick={() => setView('search')}
-        >
-          Explore Registry
-        </button>
-        <button 
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${view === 'binder' ? 'bg-blue-600 text-white shadow-md' : 'text-neutral-400 hover:text-white'}`} 
-          onClick={() => setView('binder')}
-        >
-          My Binder ({binderIds.length})
-        </button>
-      </nav>
-
-      <Filters 
-        filters={filterState} 
-        onFilterChange={setFilterState} 
-      />
-
-              <button onClick={async () => {
-                await handleGetFilteredCards();
-              }}>Show cards from series</button>
-
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
-          <p className="text-neutral-400 text-sm font-medium animate-pulse">Syncing complete Pokémon database...</p>
-        </div>
-      ) : (
-        <>
-          {view === 'search' ? (
-            <>
-              <CardGrid 
-                cards={allCards} 
-                binderIds={binderIds} 
-                setBinderIds={setBinderIds} 
-              />
-            </>
-          ) : (
-            <CardGrid 
-              cards={binderCards} 
-              binderIds={binderIds} 
-              setBinderIds={setBinderIds} 
+        <main className="py-8 sm:py-10">
+          <Routes>
+            <Route path="/" element={<HomePage seriesCount={series.length} />} />
+            <Route
+              path="/series"
+              element={<SeriesDirectory series={series} loading={seriesLoading} error={seriesError} />}
             />
-          )}
-        </>
-      )}
+            <Route path="/sets/:seriesId" element={<SeriesPage />} />
+            <Route
+              path="/sets/:seriesId/:setId"
+              element={<SetPage binderIds={binderIds} setBinderIds={setBinderIds} />}
+            />
+            <Route
+              path="/cards/:cardId"
+              element={<CardDetails binderIds={binderIds} setBinderIds={setBinderIds} />}
+            />
+            <Route
+              path="/collection"
+              element={<CollectionPage binderIds={binderIds} setBinderIds={setBinderIds} />}
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

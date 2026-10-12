@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { CardBrief } from '../types/pokemon';
 
 interface CardGridProps {
@@ -20,7 +21,7 @@ export default function CardGrid({ cards, binderIds, setBinderIds }: CardGridPro
   if (cards.length === 0) {
     return (
       <div className="w-full text-center py-16 border border-dashed border-neutral-800 rounded-xl bg-neutral-900/30">
-        <p className="text-neutral-500 font-medium">No items match your active collection filters.</p>
+        <p className="text-neutral-500 font-medium">No cards were found in this set.</p>
       </div>
     );
   }
@@ -34,21 +35,29 @@ export default function CardGrid({ cards, binderIds, setBinderIds }: CardGridPro
             key={card.id} 
             className={`group bg-neutral-900 border rounded-xl p-3 flex flex-col justify-between transition-all duration-300 ${isSaved ? 'border-amber-400/50 ring-1 ring-amber-400/20 bg-neutral-900/80' : 'border-neutral-800 hover:border-neutral-700'}`}
           >
-            <div className="relative overflow-hidden rounded-lg aspect-[3/4] bg-neutral-950 flex items-center justify-center">
+            <Link
+              to={`/cards/${encodeURIComponent(card.id)}`}
+              aria-label={`View ${card.name} card details`}
+              className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-lg bg-neutral-950"
+            >
               {card.image && (
-                <img 
-                  src={`${card.image}/low.webp`} 
-                  alt={card.name} 
+                <img
+                  src={`${card.image}/low.webp`}
+                  alt={card.name}
                   loading="lazy"
-                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                  className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                 />
               )}
-            </div>
+            </Link>
             
             <div className="mt-3 space-y-2">
-              <h3 className="text-xs font-semibold truncate text-neutral-200 group-hover:text-white" title={card.name}>
+              <Link
+                to={`/cards/${encodeURIComponent(card.id)}`}
+                className="block truncate text-xs font-semibold text-neutral-200 hover:text-white"
+                title={card.name}
+              >
                 {card.name}
-              </h3>
+              </Link>
               <button 
                 onClick={() => toggleBinderCard(card.id)}
                 className={`w-full inline-flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-colors ${isSaved ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
