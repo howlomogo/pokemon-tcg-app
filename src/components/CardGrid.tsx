@@ -7,9 +7,17 @@ interface CardGridProps {
   cards: CardBrief[];
   binderIds: string[];
   setBinderIds: React.Dispatch<React.SetStateAction<string[]>>;
+  columns?: 3 | 4 | 5 | 6;
 }
 
-export default function CardGrid({ cards, binderIds, setBinderIds }: CardGridProps) {
+const gridColumnClasses: Record<NonNullable<CardGridProps['columns']>, string> = {
+  3: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-3',
+  4: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4',
+  5: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
+  6: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6',
+};
+
+export default function CardGrid({ cards, binderIds, setBinderIds, columns }: CardGridProps) {
   const toggleBinderCard = (id: string) => {
     if (binderIds.includes(id)) {
       setBinderIds(binderIds.filter(item => item !== id));
@@ -27,7 +35,7 @@ export default function CardGrid({ cards, binderIds, setBinderIds }: CardGridPro
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+    <div className={`grid gap-5 ${columns ? gridColumnClasses[columns] : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'}`}>
       {cards.map(card => {
         const isSaved = binderIds.includes(card.id);
         const cardNumber = /^\d+$/.test(card.localId)

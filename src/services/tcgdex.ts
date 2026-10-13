@@ -95,6 +95,34 @@ export const getSet = async (set_id: string) => {
   }
 };
 
+const setCategoryRequests = new Map<string, Promise<string[]>>();
+
+export const getSetCardIdsByCategory = (setId: string, category: string) => {
+  const requestKey = `${setId}:${category}`;
+  const existingRequest = setCategoryRequests.get(requestKey);
+  if (existingRequest) return existingRequest;
+
+  const request = (async () => {
+    try {
+      const cards = await tcgdex.card.list(
+        Query.create().equal('set', setId).equal('category', category)
+      );
+      return cards.map((card) => card.id);
+    } catch (error) {
+      return handleServiceError(error, "Failed to filter cards by set and category.");
+    }
+  })();
+
+  setCategoryRequests.set(requestKey, request);
+  void request.catch(() => {
+    if (setCategoryRequests.get(requestKey) === request) {
+      setCategoryRequests.delete(requestKey);
+    }
+  });
+
+  return request;
+};
+
 // Fetch a Single Card
 const cardRequests = new Map<string, Promise<CardWithDetails | null>>();
 

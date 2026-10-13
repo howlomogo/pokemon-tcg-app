@@ -100,8 +100,8 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
       </Link>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(280px,420px)_1fr] lg:gap-12">
-        <div className="h-fit rounded-3xl border border-neutral-800 bg-neutral-900 p-5 lg:sticky lg:top-6">
-          <div className="flex aspect-[3/4] items-center justify-center overflow-hidden rounded-2xl bg-neutral-950">
+        <div className="mx-auto h-fit w-full max-w-sm rounded-3xl border border-neutral-800 bg-neutral-900 p-5 lg:sticky lg:top-6 lg:mx-0 lg:max-w-none">
+          <div className="flex h-[min(65svh,32rem)] items-center justify-center overflow-hidden rounded-2xl bg-neutral-950 lg:aspect-[3/4] lg:h-auto">
             {card.image ? (
               <img
                 src={`${card.image}/high.webp`}
@@ -242,14 +242,11 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                   {card.suffix && <DetailFact label="Suffix" value={card.suffix} />}
                   {card.level !== undefined && <DetailFact label="Level" value={String(card.level)} />}
                   {card.evolveFrom && <DetailFact label="Evolves from" value={card.evolveFrom} />}
-                  {card.hp !== undefined && <DetailFact label="HP" value={String(card.hp)} />}
-                  {card.types?.length ? <DetailFact label="Type" value={card.types.join(' / ')} /> : null}
                   {card.dexId?.length ? <DetailFact label="Pokédex number" value={card.dexId.join(', ')} /> : null}
                   {card.weight && <DetailFact label="Weight" value={card.weight} />}
                   {card.illustrator && <DetailFact label="Illustrator" value={card.illustrator} />}
                   {card.trainerType && <DetailFact label="Trainer type" value={card.trainerType} />}
                   {card.energyType && <DetailFact label="Energy type" value={card.energyType} />}
-                  {card.retreat !== undefined && <DetailFact label="Retreat cost" value={String(card.retreat)} />}
                   {card.regulationMark && <DetailFact label="Regulation mark" value={card.regulationMark} />}
                   {card.updated && <DetailFact label="Card data updated" value={formatTimestamp(card.updated)} />}
                 </div>
@@ -261,6 +258,19 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 aria-labelledby="gameplay-stats-tab"
                 className="space-y-8 pt-4"
               >
+                {(card.hp !== undefined || card.types?.length || card.retreat !== undefined) && (
+                  <section>
+                    <h2 className="mb-3 text-lg font-bold">Stats</h2>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {card.hp !== undefined && <DetailFact label="HP" value={String(card.hp)} />}
+                      {card.types?.length ? <DetailFact label="Type" value={card.types.join(' / ')} /> : null}
+                      {card.retreat !== undefined && (
+                        <DetailFact label="Retreat cost" value={String(card.retreat)} />
+                      )}
+                    </div>
+                  </section>
+                )}
+
                 {card.item && (
                   <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wide text-amber-400">Held item</p>

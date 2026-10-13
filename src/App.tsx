@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
-import StorageActions from './components/StorageActions';
 import { NotFound } from './components/shared';
 import CardDetails from './pages/CardDetails';
 import CollectionPage from './pages/CollectionPage';
@@ -57,19 +56,21 @@ export default function App() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-5 border-b border-neutral-800 pb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <Link to="/" className="flex items-center gap-3" aria-label="PokéBinder Studio home">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-400 text-neutral-950">
-                <Sparkles size={22} aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-xl font-extrabold tracking-tight">
-                  PokéBinder <span className="font-medium text-neutral-400">Studio</span>
-                </p>
-                <p className="mt-0.5 text-sm text-neutral-400">Explore the Pokémon TCG collection</p>
-              </div>
-            </Link>
-            <nav aria-label="Main navigation" className="flex items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-1">
+          <Link to="/" className="flex items-center gap-3" aria-label="PokéBinder Studio home">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-400 text-neutral-950">
+              <Sparkles size={22} aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-xl font-extrabold tracking-tight">
+                PokéBinder <span className="font-medium text-neutral-400">Studio</span>
+              </p>
+              <p className="mt-0.5 text-sm text-neutral-400">Explore the Pokémon TCG collection</p>
+            </div>
+          </Link>
+          <nav
+            aria-label="Main navigation"
+            className="flex w-fit items-center gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-1 sm:ml-auto"
+          >
               <NavLink
                 to="/"
                 end
@@ -104,9 +105,7 @@ export default function App() {
                   {binderIds.length}
                 </span>
               </NavLink>
-            </nav>
-          </div>
-          <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
+          </nav>
         </header>
 
         <main className="py-8 sm:py-10">

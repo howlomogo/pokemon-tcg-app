@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CardGrid from '../components/CardGrid';
+import StorageActions from '../components/StorageActions';
 import { ErrorMessage, LoadingMessage } from '../components/shared';
 import { getCard } from '../services/tcgdex';
 import type { CardWithDetails } from '../services/tcgdex';
@@ -60,14 +61,17 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
 
   return (
     <section>
-      <div className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
-          Your saved cards
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Collection</h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          {binderIds.length} {binderIds.length === 1 ? 'card' : 'cards'} in your collection
-        </p>
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
+            Your saved cards
+          </p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Collection</h1>
+          <p className="mt-2 text-sm text-neutral-400">
+            {binderIds.length} {binderIds.length === 1 ? 'card' : 'cards'} in your collection
+          </p>
+        </div>
+        <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
       </div>
 
       {binderIds.length === 0 ? (
