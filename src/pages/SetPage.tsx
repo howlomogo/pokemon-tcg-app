@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowLeft, Search } from 'lucide-react';
 import type { Set as TcgSet } from '@tcgdex/sdk';
 import { Link, useParams } from 'react-router-dom';
 import CardGrid from '../components/CardGrid';
@@ -15,8 +15,10 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
   const { seriesId = '', setId = '' } = useParams();
   const [result, setResult] = useState<{ id: string; set?: TcgSet; error?: string } | null>(null);
   const [searchState, setSearchState] = useState({ setId, value: '' });
-  const [sortBy, setSortBy] = useState<'localId' | 'name'>('localId');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOption, setSortOption] = useState<
+    '' | 'name-asc' | 'name-desc' | 'id-asc' | 'id-desc'
+  >('');
+  const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'owned' | 'not-owned'>('all');
 
   useEffect(() => {
     let isMounted = true;
@@ -51,17 +53,26 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
 
   const search = searchState.setId === setId ? searchState.value : '';
   const current = result?.id === setId ? result : null;
+  const setCards = current?.set?.cards ?? [];
+  const ownedCount = setCards.filter((card) => binderIds.includes(card.id)).length;
+  const notOwnedCount = setCards.length - ownedCount;
   const filteredCards = current?.set?.cards
     .filter((card) => card.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))
+    .filter((card) => {
+      if (ownershipFilter === 'owned') return binderIds.includes(card.id);
+      if (ownershipFilter === 'not-owned') return !binderIds.includes(card.id);
+      return true;
+    })
     .sort((first, second) => {
-      const firstValue = sortBy === 'name' ? first.name : first.localId;
-      const secondValue = sortBy === 'name' ? second.name : second.localId;
+      const sortByName = sortOption.startsWith('name');
+      const firstValue = sortByName ? first.name : first.localId;
+      const secondValue = sortByName ? second.name : second.localId;
       const comparison = firstValue.localeCompare(secondValue, undefined, {
         numeric: true,
         sensitivity: 'base',
       });
 
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOption === '' || sortOption.endsWith('asc') ? comparison : -comparison;
     });
 
   return (
@@ -108,7 +119,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
           </p>
         </div>
         {current?.set && (
-          <div className="grid w-full gap-3 sm:max-w-2xl sm:grid-cols-[minmax(12rem,1fr)_auto_auto]">
+          <div className="grid w-full gap-3 sm:max-w-4xl sm:grid-cols-[minmax(12rem,1fr)_auto_auto]">
             <label className="relative block">
               <span className="sr-only">Search cards by name</span>
               <Search
@@ -124,35 +135,67 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                 className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
               />
             </label>
+            <div
+              role="group"
+              aria-label="Filter cards by ownership"
+              className="flex items-center rounded-xl border border-neutral-800 bg-neutral-900 p-1"
+            >
+              {([
+                ['all', 'All'],
+                ['owned', 'Owned'],
+                ['not-owned', 'Not Owned'],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={ownershipFilter === value}
+                  onClick={() => setOwnershipFilter(value)}
+                  className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    ownershipFilter === value
+                      ? 'bg-neutral-800 text-white'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  {label}
+                  {value !== 'all' && (
+                    <span className="ml-1.5 rounded-full bg-neutral-800 px-1.5 py-0.5 text-xs text-amber-300">
+                      {value === 'owned' ? ownedCount : notOwnedCount}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
             <label className="flex items-center gap-2 text-sm text-neutral-400">
-              <span>Sort by</span>
-              <select
-                value={sortBy}
-                onChange={(event) => {
-                  if (event.target.value === 'localId' || event.target.value === 'name') {
-                    setSortBy(event.target.value);
-                  }
-                }}
-                className="min-w-28 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 text-sm text-white outline-none focus:border-amber-400"
-              >
-                <option value="localId">Id</option>
-                <option value="name">Name</option>
-              </select>
-            </label>
-            <label className="flex items-center gap-2 text-sm text-neutral-400">
-              <span className="sr-only">Sort direction</span>
-              <select
-                value={sortOrder}
-                onChange={(event) => {
-                  if (event.target.value === 'asc' || event.target.value === 'desc') {
-                    setSortOrder(event.target.value);
-                  }
-                }}
-                className="min-w-32 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 text-sm text-white outline-none focus:border-amber-400"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
+              <span className="sr-only">Sort cards</span>
+              <span className="relative block w-full">
+                <select
+                  value={sortOption}
+                  onChange={(event) => {
+                    if (event.target.value === '') {
+                      setSortOption('');
+                    } else if (
+                      event.target.value === 'name-asc' ||
+                      event.target.value === 'name-desc' ||
+                      event.target.value === 'id-asc' ||
+                      event.target.value === 'id-desc'
+                    ) {
+                      setSortOption(event.target.value);
+                    }
+                  }}
+                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-white outline-none focus:border-amber-400"
+                >
+                  <option value="" disabled>Sort by</option>
+                  <option value="id-asc"># (a - z)</option>
+                  <option value="id-desc"># (z - a)</option>
+                  <option value="name-asc">Name (a - z)</option>
+                  <option value="name-desc">Name (z - a)</option>
+                </select>
+                <ArrowDownWideNarrow
+                  size={16}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                  aria-hidden="true"
+                />
+              </span>
             </label>
           </div>
         )}

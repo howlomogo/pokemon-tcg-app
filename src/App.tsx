@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import Footer from './components/Footer';
 import StorageActions from './components/StorageActions';
 import { NotFound } from './components/shared';
 import CardDetails from './pages/CardDetails';
@@ -98,7 +99,10 @@ export default function App() {
                   }`
                 }
               >
-                Collection
+                <span>Collection</span>
+                <span className="ml-1.5 rounded-full bg-neutral-800 px-1.5 py-0.5 text-xs text-amber-300">
+                  {binderIds.length}
+                </span>
               </NavLink>
             </nav>
           </div>
@@ -128,6 +132,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </div>
   );

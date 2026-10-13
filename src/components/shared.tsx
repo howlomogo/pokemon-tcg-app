@@ -3,6 +3,7 @@ import { Layers3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { CardPricing } from '../services/tcgdex';
 import { formatFieldLabel, formatTimestamp } from '../utils/format';
+import { getTypeColorClass } from '../utils/typeColors';
 
 export function MatchupDetails({
   title,
@@ -16,7 +17,7 @@ export function MatchupDetails({
       <h2 className="font-bold">{title}</h2>
       <div className="mt-3 flex flex-wrap gap-2">
         {matchups.map((matchup) => (
-          <InfoPill key={`${matchup.type}-${matchup.value ?? ''}`}>
+          <InfoPill key={`${matchup.type}-${matchup.value ?? ''}`} className={getTypeColorClass(matchup.type)}>
             {`${matchup.type}${matchup.value ? ` ${matchup.value}` : ''}`}
           </InfoPill>
         ))}
@@ -220,9 +221,9 @@ function isCardPricing(value: unknown): value is CardPricing {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-export function InfoPill({ children }: { children: string }) {
+export function InfoPill({ children, className = '' }: { children: string; className?: string }) {
   return (
-    <span className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 text-xs font-medium text-neutral-300">
+    <span className={`rounded-full border px-3 py-1 text-xs font-medium text-neutral-300 ${className || 'border-neutral-700 bg-neutral-900'}`}>
       {children}
     </span>
   );
