@@ -214,7 +214,7 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
           imageClassName="max-h-full max-w-full transition-transform duration-300 group-hover/set:scale-105"
         />
         <span
-          className="absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-slate-950/50 px-2.5 py-1 text-[10px] font-bold text-slate-100 shadow-sm backdrop-blur-sm"
+          className="absolute right-2 top-2 z-20 inline-flex items-center gap-1.5 rounded-full bg-slate-950/50 px-2.5 py-1 text-[10px] font-bold text-slate-100 shadow-sm backdrop-blur-sm"
           title={
             formattedReleaseDate
               ? `Released ${formattedReleaseDate}`
