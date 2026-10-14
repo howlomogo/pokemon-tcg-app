@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { Serie } from '@tcgdex/sdk';
 import { Link, useParams } from 'react-router-dom';
 import { getSerie } from '../services/tcgdex';
-import { ErrorMessage, LoadingMessage, SetArtwork } from '../components/shared';
+import { ErrorMessage, LoadingMessage, SetArtwork, SetBackground } from '../components/shared';
 
 export default function SeriesPage() {
   const { seriesId = '' } = useParams();
@@ -90,11 +90,12 @@ export default function SeriesPage() {
                 to={`/sets/${encodeURIComponent(seriesId)}/${encodeURIComponent(set.id)}`}
                 className="group overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 text-left transition hover:-translate-y-1 hover:border-amber-400/60 hover:bg-neutral-900"
               >
-                <div className="flex aspect-[4/3] items-center justify-center bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-800 to-neutral-950 p-5">
+                <div className="relative isolate flex aspect-[4/3] items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-800 to-neutral-950 p-5">
+                  <SetBackground setId={set.id} />
                   <SetArtwork
                     key={set.id}
                     set={set}
-                    className="flex h-full w-full items-center justify-center"
+                    className="relative z-10 flex h-full w-full items-center justify-center"
                     imageClassName="max-h-full max-w-full transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>

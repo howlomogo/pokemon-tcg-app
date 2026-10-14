@@ -54,7 +54,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-900 text-slate-100 shadow-lg">
+      <header className="sticky top-0 z-50 w-full border-b border-[#38383d] bg-[#202023] text-[#f1f1f2] shadow-lg">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3" aria-label="PokéBinder Studio home">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-400 text-slate-950">
@@ -62,21 +62,21 @@ export default function App() {
             </div>
             <div>
               <p className="text-xl font-extrabold tracking-tight">
-                PokéBinder <span className="font-medium text-slate-300">Studio</span>
+                PokéBinder <span className="font-medium text-[#c7c7cc]">Studio</span>
               </p>
-              <p className="mt-0.5 text-sm text-slate-300">Explore the Pokémon TCG collection</p>
+              <p className="mt-0.5 text-sm text-[#b5b5bb]">Explore the Pokémon TCG collection</p>
             </div>
           </Link>
           <nav
             aria-label="Main navigation"
-            className="flex w-fit items-center gap-1 rounded-xl border border-slate-700 bg-slate-800 p-1 sm:ml-auto"
+            className="flex w-fit items-center gap-1 rounded-xl border border-[#414146] bg-[#2b2b30] p-1 sm:ml-auto"
           >
               <NavLink
                 to="/"
                 end
                 className={({ isActive }) =>
                   `rounded-lg px-3 py-2 text-sm font-medium transition ${
-                    isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white'
+                    isActive ? 'bg-[#414146] text-white' : 'text-[#c7c7cc] hover:text-white'
                   }`
                 }
               >
@@ -86,7 +86,7 @@ export default function App() {
                 to="/series"
                 className={({ isActive }) =>
                   `rounded-lg px-3 py-2 text-sm font-medium transition ${
-                    isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white'
+                    isActive ? 'bg-[#414146] text-white' : 'text-[#c7c7cc] hover:text-white'
                   }`
                 }
               >
@@ -96,12 +96,12 @@ export default function App() {
                 to="/collection"
                 className={({ isActive }) =>
                   `rounded-lg px-3 py-2 text-sm font-medium transition ${
-                    isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white'
+                    isActive ? 'bg-[#414146] text-white' : 'text-[#c7c7cc] hover:text-white'
                   }`
                 }
               >
                 <span>Collection</span>
-                <span className="ml-1.5 rounded-full bg-slate-600 px-1.5 py-0.5 text-xs text-amber-300">
+                <span className="ml-1.5 rounded-full bg-[#505056] px-1.5 py-0.5 text-xs text-amber-300">
                   {binderIds.length}
                 </span>
               </NavLink>

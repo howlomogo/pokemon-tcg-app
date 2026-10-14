@@ -1,6 +1,6 @@
 import MemoryCache from '@cachex/memory';
 import TCGdex, { Query } from '@tcgdex/sdk';
-import type { Card } from '@tcgdex/sdk';
+import type { Card, Set as TCGSet } from '@tcgdex/sdk';
 
 const tcgdex = new TCGdex('en');
 tcgdex.setCache(new MemoryCache());
@@ -47,6 +47,26 @@ export type CardWithDetails = Card & {
   variantsDetailed?: CardVariantWithPricing[];
 };
 
+const setRequests = new Map<string, Promise<TCGSet | null>>();
+
+const fetchSetDetails = (setId: string) => {
+  const existingRequest = setRequests.get(setId);
+  if (existingRequest) return existingRequest;
+
+  const request = tcgdex.set.get(setId);
+  setRequests.set(setId, request);
+  void request.then(
+    () => {
+      if (setRequests.get(setId) === request) setRequests.delete(setId);
+    },
+    () => {
+      if (setRequests.get(setId) === request) setRequests.delete(setId);
+    }
+  );
+
+  return request;
+};
+
 /**
  * Reusable Centralized Error Handler
  * Safely logs the error and normalises the message for the front end
@@ -89,9 +109,19 @@ export const getSerie = async (serie_id: string) => {
 export const getSet = async (set_id: string, series_id: string) => {
   try {
     if (isExcludedSet(series_id, set_id)) return null;
-    return await tcgdex.set.get(set_id);
+    return await fetchSetDetails(set_id);
   } catch (error) {
     handleServiceError(error, "Failed to load set data.");
+  }
+};
+
+export const getSetReleaseDate = async (set_id: string, series_id: string) => {
+  try {
+    if (isExcludedSet(series_id, set_id)) return null;
+    const set = await fetchSetDetails(set_id);
+    return set?.releaseDate ?? null;
+  } catch (error) {
+    handleServiceError(error, "Failed to load set release date.");
   }
 };
 

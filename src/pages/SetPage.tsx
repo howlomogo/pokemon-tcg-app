@@ -3,7 +3,7 @@ import { ArrowDownWideNarrow, ArrowLeft, Grid2X2, ListFilter, Search } from 'luc
 import type { Set as TcgSet } from '@tcgdex/sdk';
 import { Link, useParams } from 'react-router-dom';
 import CardGrid from '../components/CardGrid';
-import { ErrorMessage, LoadingMessage, SetArtwork } from '../components/shared';
+import { ErrorMessage, LoadingMessage, SetArtwork, SetBackground } from '../components/shared';
 import { getSet, getSetCardIdsByCategory } from '../services/tcgdex';
 
 type SetPageProps = {
@@ -176,21 +176,22 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
       </Link>
 
       {current?.set && (
-        <div className="mb-9 flex flex-col gap-6 rounded-3xl border border-neutral-800 bg-neutral-900/70 p-5 sm:flex-row sm:items-center sm:p-7">
+        <div className="relative isolate mb-9 flex flex-col gap-6 overflow-hidden rounded-3xl border border-neutral-800 bg-slate-900/90 p-5 sm:flex-row sm:items-center sm:p-7">
+          <SetBackground setId={current.set.id} variant="title" />
           <SetArtwork
             key={current.set.id}
             set={current.set}
-            className="flex h-32 shrink-0 items-center justify-center rounded-2xl bg-slate-100 px-6 sm:w-56"
+            className="relative z-10 flex h-32 shrink-0 items-center justify-center rounded-2xl bg-slate-950/70 px-6 sm:w-56"
             imageClassName="max-h-24 max-w-full"
           />
-          <div>
+          <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
               Set collection
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-100 sm:text-4xl">
               {current.set.name}
             </h1>
-            <p className="mt-2 text-sm text-neutral-400">
+            <p className="mt-2 text-sm text-slate-300">
               {current.set.cardCount.total} cards
               {current.set.cardCount.official !== current.set.cardCount.total &&
                 ` · ${current.set.cardCount.official} official`}

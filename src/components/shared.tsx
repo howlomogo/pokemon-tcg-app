@@ -5,6 +5,65 @@ import type { CardPricing } from '../services/tcgdex';
 import { formatFieldLabel, formatTimestamp } from '../utils/format';
 import { getTypeColorClass } from '../utils/typeColors';
 
+const setBackgrounds = import.meta.glob<string>('../assets/sets/*', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+const normalizeSetId = (value: string) => value.toLocaleLowerCase().replace(/[^a-z0-9]/g, '');
+
+const getSetBackgroundUrl = (setId: string) => {
+  const normalizedSetId = normalizeSetId(setId);
+  const matchingAsset = Object.entries(setBackgrounds).find(([path]) => {
+    const filename = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? '';
+    return normalizeSetId(filename) === normalizedSetId;
+  });
+
+  return matchingAsset?.[1];
+};
+
+export function SetBackground({
+  setId,
+  variant = 'card',
+}: {
+  setId: string;
+  variant?: 'card' | 'title';
+}) {
+  const imageUrl = getSetBackgroundUrl(setId);
+  if (!imageUrl) return null;
+
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
+          variant === 'title' ? 'opacity-45' : 'opacity-40 group-hover/set:opacity-55'
+        }`}
+        style={{ backgroundImage: `url("${imageUrl}")` }}
+      />
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-t ${
+          variant === 'title'
+            ? 'from-slate-950/80 via-slate-950/50 to-slate-900/30'
+            : 'from-slate-950/85 via-slate-950/55 to-slate-900/35'
+        }`}
+      />
+      {variant === 'title' && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-55"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255, 255, 255, 0.16) 2.5px, transparent 3px)',
+            backgroundSize: '15px 15px',
+          }}
+        />
+      )}
+    </>
+  );
+}
+
 export function MatchupDetails({
   title,
   matchups,
