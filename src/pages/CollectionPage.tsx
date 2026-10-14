@@ -82,7 +82,7 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
           </p>
           <Link
             to="/series"
-            className="mt-5 inline-flex rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-300"
+            className="mt-5 inline-flex rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
           >
             Browse series
           </Link>

@@ -80,7 +80,7 @@ export default function CardGrid({ cards, binderIds, setBinderIds, columns }: Ca
             <div className="mt-3 space-y-2">
               <Link
                 to={`/cards/${encodeURIComponent(card.id)}`}
-                className="flex min-w-0 items-baseline gap-1.5 text-xs font-semibold text-neutral-200 hover:text-white"
+                className="flex min-w-0 items-baseline gap-1.5 text-xs font-semibold text-neutral-200 hover:text-neutral-100"
                 title={card.name}
               >
                 <span className="truncate">{card.name}</span>

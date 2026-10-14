@@ -44,7 +44,7 @@ export default function StorageActions({ binderIds, setBinderIds }: StorageActio
     reader.readAsText(file);
   };
 
-  const actionStyle = "inline-flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-white hover:border-neutral-600 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors";
+  const actionStyle = "inline-flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-neutral-100 hover:border-neutral-600 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors";
 
   return (
     <div className="flex flex-wrap gap-2">

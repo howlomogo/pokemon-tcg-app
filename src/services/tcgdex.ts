@@ -5,6 +5,24 @@ import type { Card } from '@tcgdex/sdk';
 const tcgdex = new TCGdex('en');
 tcgdex.setCache(new MemoryCache());
 
+// Exclude sets with minimal or no information
+const excludedSeriesIds = new Set(['misc', 'tk', 'mc', 'tcgp']);
+const excludedSetRoutes = new Set([
+  'base:wp',
+  'ecard:sp',
+  'ecard:bog',
+  'ex:ex5.5',
+  'ex:exu',
+  'bw:rc',
+  'xy:xya',
+  'sv:sve',
+  'sv:mfb',
+  'me:mee',
+]);
+
+const isExcludedSet = (seriesId: string, setId: string) =>
+  excludedSetRoutes.has(`${seriesId}:${setId}`);
+
 export interface CardPricing {
   [key: string]: string | number | boolean | null | CardPricing;
 }
@@ -47,7 +65,8 @@ const handleServiceError = (error: unknown, fallbackMessage: string): never => {
 // Fetch All Series
 export const getAllSeries = async () => {
   try {
-    return await tcgdex.fetch('series');
+    const series = await tcgdex.fetch('series');
+    return series?.filter((serie) => !excludedSeriesIds.has(serie.id));
   } catch (error) {
     handleServiceError(error, "Failed to retrieve the series directory.");
   }
@@ -56,15 +75,20 @@ export const getAllSeries = async () => {
 // Fetch a Single Series
 export const getSerie = async (serie_id: string) => {
   try {
-    return await tcgdex.serie.get(serie_id);
+    if (excludedSeriesIds.has(serie_id)) return null;
+    const series = await tcgdex.serie.get(serie_id);
+    return series
+      ? { ...series, sets: series.sets.filter((set) => !isExcludedSet(series.id, set.id)) }
+      : series;
   } catch (error) {
     handleServiceError(error, "Failed to load set data.");
   }
 };
 
 // Fetch a Single Set
-export const getSet = async (set_id: string) => {
+export const getSet = async (set_id: string, series_id: string) => {
   try {
+    if (isExcludedSet(series_id, set_id)) return null;
     return await tcgdex.set.get(set_id);
   } catch (error) {
     handleServiceError(error, "Failed to load set data.");

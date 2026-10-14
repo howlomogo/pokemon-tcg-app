@@ -42,7 +42,7 @@ export default function SeriesDirectory({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search series..."
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
+            className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
           />
         </label>
       </div>

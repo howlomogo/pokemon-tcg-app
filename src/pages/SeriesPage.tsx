@@ -46,7 +46,7 @@ export default function SeriesPage() {
     <section>
       <Link
         to="/series"
-        className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-neutral-400 transition hover:text-white"
+        className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-neutral-400 transition hover:text-neutral-100"
       >
         <ArrowLeft size={16} aria-hidden="true" />
         All series

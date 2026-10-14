@@ -37,7 +37,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
 
     const loadSet = async () => {
       try {
-        const data = await getSet(setId);
+        const data = await getSet(setId, seriesId);
         if (!isMounted) return;
 
         if (!data) {
@@ -61,7 +61,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
     return () => {
       isMounted = false;
     };
-  }, [setId]);
+  }, [seriesId, setId]);
 
   const search = searchState.setId === setId ? searchState.value : '';
   const current = result?.id === setId ? result : null;
@@ -169,7 +169,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
     <section>
       <Link
         to={`/sets/${encodeURIComponent(seriesId)}`}
-        className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-neutral-400 transition hover:text-white"
+        className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-neutral-400 transition hover:text-neutral-100"
       >
         <ArrowLeft size={16} aria-hidden="true" />
         Back to series sets
@@ -180,7 +180,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
           <SetArtwork
             key={current.set.id}
             set={current.set}
-            className="flex h-32 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 px-6 sm:w-56"
+            className="flex h-32 shrink-0 items-center justify-center rounded-2xl bg-slate-100 px-6 sm:w-56"
             imageClassName="max-h-24 max-w-full"
           />
           <div>
@@ -240,7 +240,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                     setSearchSuggestionsOpen(true);
                   }}
                   placeholder="Search cards..."
-                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
+                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
                 />
               </label>
               <div
@@ -266,7 +266,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                       setSearchState({ setId, value: name });
                       setSearchSuggestionsOpen(false);
                     }}
-                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-200 transition hover:bg-neutral-800 hover:text-white"
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-neutral-200 transition hover:bg-neutral-800 hover:text-neutral-100"
                   >
                     {name}
                   </button>
@@ -290,8 +290,8 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                   onClick={() => setOwnershipFilter(value)}
                   className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition ${
                     ownershipFilter === value
-                      ? 'bg-neutral-800 text-white'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-neutral-800 text-neutral-100'
+                      : 'text-neutral-400 hover:text-neutral-100'
                   }`}
                 >
                   {label}
@@ -320,7 +320,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                       if (selectedCategory) setCategoryFilter(selectedCategory);
                     }
                   }}
-                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-white outline-none focus:border-amber-400 disabled:cursor-wait disabled:opacity-60"
+                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-neutral-100 outline-none focus:border-amber-400 disabled:cursor-wait disabled:opacity-60"
                 >
                   <option value="" disabled>Category</option>
                   <option value="All">All</option>
@@ -352,7 +352,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                       setSortOption(event.target.value);
                     }
                   }}
-                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-white outline-none focus:border-amber-400"
+                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-neutral-100 outline-none focus:border-amber-400"
                 >
                   <option value="" disabled>Sort by</option>
                   <option value="id-asc"># (a - z)</option>
@@ -384,7 +384,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                       setGridColumns(6);
                     }
                   }}
-                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-white outline-none focus:border-amber-400"
+                  className="w-full appearance-none rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 pr-9 text-sm text-neutral-100 outline-none focus:border-amber-400"
                 >
                   <option value="" disabled>Per row</option>
                   <option value="3">3</option>

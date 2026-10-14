@@ -93,7 +93,7 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
     <section>
       <Link
         to="/series"
-        className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-neutral-400 transition hover:text-white"
+        className="mb-7 inline-flex items-center gap-2 rounded-lg text-sm font-medium text-neutral-400 transition hover:text-neutral-100"
       >
         <ArrowLeft size={16} aria-hidden="true" />
         All series
@@ -166,8 +166,8 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 onClick={() => setActiveInfoTab('card')}
                 className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition ${
                   activeInfoTab === 'card'
-                    ? 'border-amber-400 text-white'
-                    : 'border-transparent text-neutral-400 hover:text-white'
+                    ? 'border-amber-400 text-neutral-100'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-100'
                 }`}
               >
                 <FileText size={16} aria-hidden="true" />
@@ -182,8 +182,8 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 onClick={() => setActiveInfoTab('gameplay')}
                 className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition ${
                   activeInfoTab === 'gameplay'
-                    ? 'border-amber-400 text-white'
-                    : 'border-transparent text-neutral-400 hover:text-white'
+                    ? 'border-amber-400 text-neutral-100'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-100'
                 }`}
               >
                 <Swords size={16} aria-hidden="true" />
@@ -198,8 +198,8 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 onClick={() => setActiveInfoTab('market')}
                 className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition ${
                   activeInfoTab === 'market'
-                    ? 'border-amber-400 text-white'
-                    : 'border-transparent text-neutral-400 hover:text-white'
+                    ? 'border-amber-400 text-neutral-100'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-100'
                 }`}
               >
                 <TrendingUp size={16} aria-hidden="true" />
@@ -214,8 +214,8 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 onClick={() => setActiveInfoTab('print')}
                 className={`inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition ${
                   activeInfoTab === 'print'
-                    ? 'border-amber-400 text-white'
-                    : 'border-transparent text-neutral-400 hover:text-white'
+                    ? 'border-amber-400 text-neutral-100'
+                    : 'border-transparent text-neutral-400 hover:text-neutral-100'
                 }`}
               >
                 <Layers3 size={16} aria-hidden="true" />
