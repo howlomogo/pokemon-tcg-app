@@ -171,7 +171,7 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 }`}
               >
                 <FileText size={16} aria-hidden="true" />
-                Card information
+                Card Information
               </button>
               <button
                 type="button"
@@ -187,7 +187,7 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 }`}
               >
                 <Swords size={16} aria-hidden="true" />
-                Gameplay stats
+                Gameplay Stats
               </button>
               <button
                 type="button"
@@ -219,7 +219,7 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 }`}
               >
                 <Layers3 size={16} aria-hidden="true" />
-                Print versions
+                Print Versions
               </button>
             </div>
 
@@ -228,28 +228,36 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
                 role="tabpanel"
                 id="card-information-panel"
                 aria-labelledby="card-information-tab"
-                className="pt-4"
+                className="space-y-8 pt-4"
               >
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <DetailFact label="Card ID" value={card.id} />
-                  <DetailFact label="Set" value={card.set.name} />
-                  <DetailFact label="Set ID" value={card.set.id} />
-                  <DetailFact label="Set cards" value={String(card.set.cardCount.total)} />
-                  <DetailFact label="Official set cards" value={String(card.set.cardCount.official)} />
-                  <DetailFact label="Category" value={card.category} />
-                  {card.rarity && <DetailFact label="Rarity" value={card.rarity} />}
-                  {card.stage && <DetailFact label="Stage" value={card.stage} />}
-                  {card.suffix && <DetailFact label="Suffix" value={card.suffix} />}
-                  {card.level !== undefined && <DetailFact label="Level" value={String(card.level)} />}
-                  {card.evolveFrom && <DetailFact label="Evolves from" value={card.evolveFrom} />}
-                  {card.dexId?.length ? <DetailFact label="Pokédex number" value={card.dexId.join(', ')} /> : null}
-                  {card.weight && <DetailFact label="Weight" value={card.weight} />}
-                  {card.illustrator && <DetailFact label="Illustrator" value={card.illustrator} />}
-                  {card.trainerType && <DetailFact label="Trainer type" value={card.trainerType} />}
-                  {card.energyType && <DetailFact label="Energy type" value={card.energyType} />}
-                  {card.regulationMark && <DetailFact label="Regulation mark" value={card.regulationMark} />}
-                  {card.updated && <DetailFact label="Card data updated" value={formatTimestamp(card.updated)} />}
-                </div>
+                <section>
+                  <h2 className="mb-3 text-lg font-bold">Card details</h2>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <DetailFact label="Card ID" value={card.id} />
+                    <DetailFact label="Category" value={card.category} />
+                    {card.rarity && <DetailFact label="Rarity" value={card.rarity} />}
+                    {card.stage && <DetailFact label="Stage" value={card.stage} />}
+                    {card.suffix && <DetailFact label="Suffix" value={card.suffix} />}
+                    {card.level !== undefined && <DetailFact label="Level" value={String(card.level)} />}
+                    {card.evolveFrom && <DetailFact label="Evolves from" value={card.evolveFrom} />}
+                    {card.dexId?.length ? <DetailFact label="Pokédex number" value={card.dexId.join(', ')} /> : null}
+                    {card.weight && <DetailFact label="Weight" value={card.weight} />}
+                    {card.illustrator && <DetailFact label="Illustrator" value={card.illustrator} />}
+                    {card.trainerType && <DetailFact label="Trainer type" value={card.trainerType} />}
+                    {card.energyType && <DetailFact label="Energy type" value={card.energyType} />}
+                    {card.regulationMark && <DetailFact label="Regulation mark" value={card.regulationMark} />}
+                    {card.updated && <DetailFact label="Card data updated" value={formatTimestamp(card.updated)} />}
+                  </div>
+                </section>
+                <section>
+                  <h2 className="mb-3 text-lg font-bold">Set details</h2>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <DetailFact label="Set" value={card.set.name} />
+                    <DetailFact label="Set ID" value={card.set.id} />
+                    <DetailFact label="Set cards" value={String(card.set.cardCount.total)} />
+                    <DetailFact label="Official set cards" value={String(card.set.cardCount.official)} />
+                  </div>
+                </section>
               </div>
             ) : activeInfoTab === 'gameplay' ? (
               <div
