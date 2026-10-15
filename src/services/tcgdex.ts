@@ -115,13 +115,18 @@ export const getSet = async (set_id: string, series_id: string) => {
   }
 };
 
-export const getSetReleaseDate = async (set_id: string, series_id: string) => {
+export const getSetDirectoryData = async (set_id: string, series_id: string) => {
   try {
     if (isExcludedSet(series_id, set_id)) return null;
     const set = await fetchSetDetails(set_id);
-    return set?.releaseDate ?? null;
+    return set
+      ? {
+          releaseDate: set.releaseDate ?? null,
+          cardIds: set.cards.map((card) => card.id),
+        }
+      : null;
   } catch (error) {
-    handleServiceError(error, "Failed to load set release date.");
+    handleServiceError(error, "Failed to load set details.");
   }
 };
 

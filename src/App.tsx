@@ -115,7 +115,14 @@ export default function App() {
             <Route path="/" element={<HomePage seriesCount={series.length} />} />
             <Route
               path="/series"
-              element={<SeriesDirectory series={series} loading={seriesLoading} error={seriesError} />}
+              element={
+                <SeriesDirectory
+                  series={series}
+                  loading={seriesLoading}
+                  error={seriesError}
+                  binderIds={binderIds}
+                />
+              }
             />
             <Route path="/sets/:seriesId" element={<SeriesPage />} />
             <Route

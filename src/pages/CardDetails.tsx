@@ -99,6 +99,7 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
 
   const card = current.card;
   const isSaved = binderIds.includes(card.id);
+  const isHolo = card.variants?.holo === true;
   const toggleBinderCard = () => {
     setNoticeVisible(false);
     setCollectionNotice(isSaved ? 'removed' : 'added');
@@ -119,7 +120,39 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
 
       <div className="grid gap-8 lg:grid-cols-[minmax(280px,420px)_1fr] lg:gap-12">
         <div className="mx-auto h-fit w-full max-w-sm rounded-3xl border border-neutral-800 bg-neutral-900 p-5 lg:sticky lg:top-6 lg:mx-0 lg:max-w-none">
-          <div className="flex h-[min(65svh,32rem)] items-center justify-center overflow-hidden rounded-2xl bg-neutral-950 lg:aspect-[3/4] lg:h-auto">
+          <div
+            className={`relative flex h-[min(65svh,32rem)] items-center justify-center overflow-hidden rounded-2xl bg-neutral-950 transition-transform duration-300 ease-out will-change-transform lg:aspect-[3/4] lg:h-auto ${
+              isHolo ? 'group' : ''
+            }`}
+            onPointerMove={(event) => {
+              if (
+                event.pointerType !== 'mouse' ||
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ) {
+                return;
+              }
+
+              const bounds = event.currentTarget.getBoundingClientRect();
+              const pointerX = (event.clientX - bounds.left) / bounds.width;
+              const pointerY = (event.clientY - bounds.top) / bounds.height;
+
+              if (isHolo) {
+                event.currentTarget.style.setProperty('--shine-x', `${pointerX * 100}%`);
+                event.currentTarget.style.setProperty('--shine-y', `${pointerY * 100}%`);
+              }
+
+              const rotateX = (0.5 - pointerY) * 12;
+              const rotateY = (pointerX - 0.5) * 12;
+
+              event.currentTarget.style.transform =
+                `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
+            }}
+            onPointerLeave={(event) => {
+              event.currentTarget.style.transform = '';
+              event.currentTarget.style.removeProperty('--shine-x');
+              event.currentTarget.style.removeProperty('--shine-y');
+            }}
+          >
             {card.image ? (
               <img
                 src={`${card.image}/high.webp`}
@@ -128,6 +161,12 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
               />
             ) : (
               <Layers3 size={48} className="text-neutral-600" aria-hidden="true" />
+            )}
+            {isHolo && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,transparent_18%,rgba(255,80,190,0.18)_36%,rgba(80,255,255,0.25)_50%,rgba(255,245,120,0.18)_64%,transparent_82%),radial-gradient(circle_at_var(--shine-x,50%)_var(--shine-y,50%),rgba(255,255,255,0.42),transparent_58%)] opacity-0 mix-blend-screen transition-opacity duration-300 group-hover:opacity-100"
+              />
             )}
           </div>
         </div>

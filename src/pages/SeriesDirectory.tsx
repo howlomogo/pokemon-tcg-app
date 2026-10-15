@@ -9,16 +9,18 @@ import {
   SetArtwork,
   SetBackground,
 } from '../components/shared';
-import { getSerie, getSetReleaseDate } from '../services/tcgdex';
+import { getSerie, getSetDirectoryData } from '../services/tcgdex';
 
 export default function SeriesDirectory({
   series,
   loading,
   error,
+  binderIds,
 }: {
   series: SerieList;
   loading: boolean;
   error: string | null;
+  binderIds: string[];
 }) {
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'oldest' | 'newest'>('newest');
@@ -84,6 +86,7 @@ export default function SeriesDirectory({
             <SeriesSection
               key={serie.id}
               serie={serie}
+              binderIds={binderIds}
             />
           ))}
         </div>
@@ -97,7 +100,13 @@ export default function SeriesDirectory({
   );
 }
 
-function SeriesSection({ serie }: { serie: SerieList[number] }) {
+function SeriesSection({
+  serie,
+  binderIds,
+}: {
+  serie: SerieList[number];
+  binderIds: string[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [seriesDetails, setSeriesDetails] = useState<Serie | null>(null);
   const [loading, setLoading] = useState(false);
@@ -171,6 +180,7 @@ function SeriesSection({ serie }: { serie: SerieList[number] }) {
                   key={set.id}
                   set={set}
                   seriesId={serie.id}
+                  binderIds={binderIds}
                 />
               ))}
             </div>
@@ -183,27 +193,43 @@ function SeriesSection({ serie }: { serie: SerieList[number] }) {
   );
 }
 
-function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
-  const [releaseDate, setReleaseDate] = useState<string | null>(null);
-  const [releaseDateError, setReleaseDateError] = useState<string | null>(null);
-  const [loadingReleaseDate, setLoadingReleaseDate] = useState(true);
+function SetCard({
+  set,
+  seriesId,
+  binderIds,
+}: {
+  set: SetResume;
+  seriesId: string;
+  binderIds: string[];
+}) {
+  const [directoryData, setDirectoryData] = useState<{
+    releaseDate: string | null;
+    cardIds: string[];
+  } | null>(null);
+  const [directoryDataError, setDirectoryDataError] = useState<string | null>(null);
+  const [loadingDirectoryData, setLoadingDirectoryData] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
-    void getSetReleaseDate(set.id, seriesId)
-      .then((date) => {
-        if (isMounted) setReleaseDate(date ?? null);
+    void getSetDirectoryData(set.id, seriesId)
+      .then((data) => {
+        if (!isMounted) return;
+        if (!data) {
+          setDirectoryDataError('Set details are unavailable.');
+          return;
+        }
+        setDirectoryData(data);
       })
       .catch((error: unknown) => {
         if (isMounted) {
-          setReleaseDateError(
-            error instanceof Error ? error.message : 'Unable to load the release date.'
+          setDirectoryDataError(
+            error instanceof Error ? error.message : 'Unable to load set details.'
           );
         }
       })
       .finally(() => {
-        if (isMounted) setLoadingReleaseDate(false);
+        if (isMounted) setLoadingDirectoryData(false);
       });
 
     return () => {
@@ -211,7 +237,9 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
     };
   }, [seriesId, set.id]);
 
-  const parsedDate = releaseDate ? new Date(`${releaseDate}T00:00:00`) : null;
+  const parsedDate = directoryData?.releaseDate
+    ? new Date(`${directoryData.releaseDate}T00:00:00`)
+    : null;
   const formattedReleaseDate =
     parsedDate && !Number.isNaN(parsedDate.getTime())
       ? new Intl.DateTimeFormat(undefined, {
@@ -221,7 +249,12 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
         }).format(parsedDate)
       : null;
   const releaseDateLabel =
-    formattedReleaseDate ?? (loadingReleaseDate ? 'Loading date…' : 'Date unavailable');
+    formattedReleaseDate ?? (loadingDirectoryData ? 'Loading date…' : 'Date unavailable');
+  const collectedCount = directoryData?.cardIds.filter((id) => binderIds.includes(id)).length;
+  const collectionPercentage =
+    collectedCount === undefined || set.cardCount.total === 0
+      ? null
+      : Math.round((collectedCount / set.cardCount.total) * 100);
 
   return (
     <Link
@@ -240,7 +273,7 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
           title={
             formattedReleaseDate
               ? `Released ${formattedReleaseDate}`
-              : releaseDateError ?? 'Release date unavailable'
+              : directoryDataError ?? 'Release date unavailable'
           }
         >
           <CalendarDays size={12} aria-hidden="true" />
@@ -252,6 +285,17 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
           {set.name}
         </h3>
         <p className="mt-1 text-xs text-neutral-500">{set.cardCount.total} cards</p>
+        {collectionPercentage !== null ? (
+          <p className="mt-1 text-xs font-medium text-amber-300">
+            {collectedCount} collected · {collectionPercentage}%
+          </p>
+        ) : loadingDirectoryData ? (
+          <p className="mt-1 text-xs text-neutral-500">Loading collection progress…</p>
+        ) : (
+          <p className="mt-1 text-xs text-neutral-500">
+            {directoryDataError ?? 'Collection progress unavailable'}
+          </p>
+        )}
       </div>
     </Link>
   );
