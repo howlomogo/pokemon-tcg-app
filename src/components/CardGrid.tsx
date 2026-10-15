@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { CardBrief } from '../types/pokemon';
@@ -18,12 +18,33 @@ const gridColumnClasses: Record<NonNullable<CardGridProps['columns']>, string> =
 };
 
 export default function CardGrid({ cards, binderIds, setBinderIds, columns }: CardGridProps) {
+  const [collectionNotice, setCollectionNotice] = useState<{
+    cardId: string;
+    action: 'added' | 'removed';
+  } | null>(null);
+  const [noticeVisible, setNoticeVisible] = useState(false);
+
+  useEffect(() => {
+    if (!collectionNotice) return;
+
+    const animationFrameId = window.requestAnimationFrame(() => setNoticeVisible(true));
+    const hideTimeoutId = window.setTimeout(() => setNoticeVisible(false), 1300);
+    const clearTimeoutId = window.setTimeout(() => setCollectionNotice(null), 1650);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      window.clearTimeout(hideTimeoutId);
+      window.clearTimeout(clearTimeoutId);
+    };
+  }, [collectionNotice]);
+
   const toggleBinderCard = (id: string) => {
-    if (binderIds.includes(id)) {
-      setBinderIds(binderIds.filter(item => item !== id));
-    } else {
-      setBinderIds([...binderIds, id]);
-    }
+    const isSaved = binderIds.includes(id);
+    setBinderIds((ids) =>
+      isSaved ? ids.filter((item) => item !== id) : [...ids, id]
+    );
+    setNoticeVisible(false);
+    setCollectionNotice({ cardId: id, action: isSaved ? 'removed' : 'added' });
   };
 
   if (cards.length === 0) {
@@ -62,19 +83,31 @@ export default function CardGrid({ cards, binderIds, setBinderIds, columns }: Ca
                   />
                 )}
               </Link>
-              <button
-                type="button"
-                onClick={() => toggleBinderCard(card.id)}
-                aria-label={isSaved ? `Remove ${card.name} from favourites` : `Add ${card.name} to favourites`}
-                aria-pressed={isSaved}
-                className={`absolute right-1.5 top-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-colors ${
-                  isSaved
-                    ? 'bg-rose-500 text-white hover:bg-rose-600'
-                    : 'bg-neutral-950/75 text-neutral-200 hover:bg-rose-500 hover:text-white'
-                }`}
-              >
-                <Heart size={14} fill={isSaved ? 'currentColor' : 'none'} />
-              </button>
+              <div className="absolute right-1.5 top-1.5 z-20 flex items-start gap-2">
+                {collectionNotice?.cardId === card.id && (
+                  <span
+                    role="status"
+                    className={`pointer-events-none whitespace-nowrap rounded-lg border border-neutral-700 bg-neutral-900 px-2.5 py-1.5 text-xs font-medium text-neutral-100 shadow-lg transition-opacity duration-300 ${
+                      noticeVisible ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    {collectionNotice.action === 'added' ? 'Added' : 'Removed'}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => toggleBinderCard(card.id)}
+                  aria-label={isSaved ? `Remove ${card.name} from collection` : `Add ${card.name} to collection`}
+                  aria-pressed={isSaved}
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-colors ${
+                    isSaved
+                      ? 'bg-rose-500 text-white hover:bg-rose-600'
+                      : 'bg-neutral-950/75 text-neutral-200 hover:bg-rose-500 hover:text-white'
+                  }`}
+                >
+                  <Heart size={14} fill={isSaved ? 'currentColor' : 'none'} />
+                </button>
+              </div>
             </div>
             
             <div className="mt-3 space-y-2">

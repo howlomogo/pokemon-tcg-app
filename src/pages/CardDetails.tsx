@@ -43,6 +43,22 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
   const { cardId = '' } = useParams();
   const [result, setResult] = useState<{ id: string; card?: CardWithDetails; error?: string } | null>(null);
   const [activeInfoTab, setActiveInfoTab] = useState<'card' | 'gameplay' | 'market' | 'print'>('card');
+  const [collectionNotice, setCollectionNotice] = useState<'added' | 'removed' | null>(null);
+  const [noticeVisible, setNoticeVisible] = useState(false);
+
+  useEffect(() => {
+    if (!collectionNotice) return;
+
+    const animationFrameId = window.requestAnimationFrame(() => setNoticeVisible(true));
+    const hideTimeoutId = window.setTimeout(() => setNoticeVisible(false), 1300);
+    const clearTimeoutId = window.setTimeout(() => setCollectionNotice(null), 1650);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      window.clearTimeout(hideTimeoutId);
+      window.clearTimeout(clearTimeoutId);
+    };
+  }, [collectionNotice]);
 
   useEffect(() => {
     let isMounted = true;
@@ -84,6 +100,8 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
   const card = current.card;
   const isSaved = binderIds.includes(card.id);
   const toggleBinderCard = () => {
+    setNoticeVisible(false);
+    setCollectionNotice(isSaved ? 'removed' : 'added');
     setBinderIds((ids) =>
       ids.includes(card.id) ? ids.filter((id) => id !== card.id) : [...ids, card.id]
     );
@@ -119,20 +137,32 @@ export default function CardDetails({ binderIds, setBinderIds }: CardDetailsProp
             <p className="pr-36 text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
               {card.set.name} · {card.localId}
             </p>
-            <button
-              type="button"
-              onClick={toggleBinderCard}
-              aria-label={isSaved ? `Remove ${card.name} from collection` : `Add ${card.name} to collection`}
-              aria-pressed={isSaved}
-              className={`absolute right-0 top-0 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                isSaved
-                  ? 'bg-rose-500/10 text-rose-300 hover:bg-rose-500/20'
-                  : 'bg-neutral-800 text-neutral-300 hover:bg-rose-500/10 hover:text-rose-300'
-              }`}
-            >
-              <Heart size={14} fill={isSaved ? 'currentColor' : 'none'} />
-              {isSaved ? 'In collection' : 'Add to collection'}
-            </button>
+            <div className="absolute right-0 top-0 flex items-start gap-2">
+              {collectionNotice && (
+                <span
+                  role="status"
+                  className={`whitespace-nowrap rounded-lg border border-neutral-700 bg-neutral-900 px-2.5 py-1.5 text-xs font-medium text-neutral-100 shadow-lg transition-opacity duration-300 ${
+                    noticeVisible ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  {collectionNotice === 'added' ? 'Added' : 'Removed'}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={toggleBinderCard}
+                aria-label={isSaved ? `Remove ${card.name} from collection` : `Add ${card.name} to collection`}
+                aria-pressed={isSaved}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                  isSaved
+                    ? 'bg-rose-500/10 text-rose-300 hover:bg-rose-500/20'
+                    : 'bg-neutral-800 text-neutral-300 hover:bg-rose-500/10 hover:text-rose-300'
+                }`}
+              >
+                <Heart size={14} fill={isSaved ? 'currentColor' : 'none'} />
+                {isSaved ? 'In collection' : 'Add to collection'}
+              </button>
+            </div>
           </div>
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{card.name}</h1>
           <div className="mt-4 flex flex-wrap gap-2">

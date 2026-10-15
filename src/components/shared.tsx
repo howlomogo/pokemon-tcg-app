@@ -70,7 +70,7 @@ function BackgroundLayers({
           variant === 'title'
             ? 'from-slate-950/80 via-slate-950/50 to-slate-900/30'
             : variant === 'series'
-              ? 'from-slate-950/90 via-slate-950/75 to-slate-900/60'
+              ? 'from-slate-950/85 via-slate-950/70 to-slate-900/55'
               : 'from-slate-950/85 via-slate-950/55 to-slate-900/35'
         }`}
       />

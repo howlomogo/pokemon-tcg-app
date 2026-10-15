@@ -176,12 +176,12 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
       </Link>
 
       {current?.set && (
-        <div className="relative isolate mb-9 flex flex-col gap-6 overflow-hidden rounded-3xl border border-neutral-800 bg-slate-900/90 p-5 sm:flex-row sm:items-center sm:p-7">
+        <div className="relative isolate mb-9 flex flex-col gap-6 overflow-hidden rounded-3xl border border-neutral-800 bg-slate-800/90 p-5 sm:flex-row sm:items-center sm:p-7">
           <SetBackground setId={current.set.id} variant="title" />
           <SetArtwork
             key={current.set.id}
             set={current.set}
-            className="relative z-10 flex h-32 shrink-0 items-center justify-center rounded-2xl bg-slate-950/70 px-6 sm:w-56"
+            className="relative z-10 flex h-32 shrink-0 items-center justify-center px-6 sm:w-56"
             imageClassName="max-h-24 max-w-full"
           />
           <div className="relative z-10">
