@@ -53,7 +53,7 @@ export default function App() {
   }, [pathname, series.length]);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
       <header className="sticky top-0 z-50 w-full border-b border-[#38383d] bg-[#202023] text-[#f1f1f2] shadow-lg">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3" aria-label="PokéBinder Studio home">
@@ -109,7 +109,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8">
         <main className="py-8 sm:py-10">
           <Routes>
             <Route path="/" element={<HomePage seriesCount={series.length} />} />
@@ -140,8 +140,8 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <Footer />
       </div>
+      <Footer />
     </div>
   );
 }

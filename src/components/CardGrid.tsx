@@ -66,20 +66,22 @@ export default function CardGrid({ cards, binderIds, setBinderIds, columns }: Ca
         return (
           <div 
             key={card.id} 
-            className={`group bg-neutral-900 border rounded-xl p-3 flex flex-col justify-between transition-all duration-300 ${isSaved ? 'border-amber-400/50 ring-1 ring-amber-400/20 bg-neutral-900/80' : 'border-neutral-800 hover:border-neutral-700'}`}
+            className={`group relative bg-neutral-900 border rounded-xl p-3 flex flex-col justify-between transition-all duration-300 ease-in-out hover:z-10 hover:scale-105 ${isSaved ? 'border-amber-400/50 ring-1 ring-amber-400/20 bg-neutral-900/80' : 'border-neutral-800 hover:border-neutral-700'}`}
           >
             <div className="relative">
               <Link
                 to={`/cards/${encodeURIComponent(card.id)}`}
                 aria-label={`View ${card.name} card details`}
-                className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-lg bg-neutral-950"
+                className="relative flex aspect-[3/4] items-center justify-center rounded-lg bg-neutral-950"
               >
                 {card.image && (
                   <img
                     src={`${card.image}/low.webp`}
                     alt={card.name}
                     loading="lazy"
-                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    className={`h-full w-full rounded-lg object-contain transition-opacity duration-300 ${
+                      isSaved ? '' : 'opacity-60 group-hover:opacity-100'
+                    }`}
                   />
                 )}
               </Link>

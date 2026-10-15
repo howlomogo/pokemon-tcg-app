@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowDownWideNarrow, CalendarDays, ChevronDown, Search } from 'lucide-react';
+import { ArrowDownWideNarrow, CalendarDays, ChevronDown, Layers3, Search } from 'lucide-react';
 import type { Serie, SerieList, SetResume } from '@tcgdex/sdk';
 import { Link } from 'react-router-dom';
 import {
@@ -279,16 +279,24 @@ function SetCard({
           <CalendarDays size={12} aria-hidden="true" />
           {releaseDateLabel}
         </span>
+        {collectionPercentage !== null && (
+          <span className="absolute bottom-2 right-2 z-20 rounded-full bg-slate-950/70 px-2.5 py-1 text-xs font-bold text-amber-300 shadow-sm backdrop-blur-sm">
+            {collectionPercentage}%
+          </span>
+        )}
       </div>
       <div className="p-4">
         <h3 className="truncate font-bold tracking-wide text-neutral-100 group-hover/set:text-amber-300">
           {set.name}
         </h3>
-        <p className="mt-1 text-xs text-neutral-500">{set.cardCount.total} cards</p>
         {collectionPercentage !== null ? (
-          <p className="mt-1 text-xs font-medium text-amber-300">
-            {collectedCount} collected · {collectionPercentage}%
-          </p>
+          <div className="mt-1 flex items-center justify-between text-xs text-neutral-300">
+            <span className="inline-flex items-center gap-1.5">
+              <Layers3 size={14} aria-hidden="true" />
+              Cards collected
+            </span>
+            <span className="font-bold">{collectedCount}/{set.cardCount.total}</span>
+          </div>
         ) : loadingDirectoryData ? (
           <p className="mt-1 text-xs text-neutral-500">Loading collection progress…</p>
         ) : (
