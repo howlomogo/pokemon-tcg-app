@@ -5,7 +5,7 @@ import type { CardPricing } from '../services/tcgdex';
 import { formatFieldLabel, formatTimestamp } from '../utils/format';
 import { getTypeColorClass } from '../utils/typeColors';
 
-const setBackgrounds = import.meta.glob<string>('../assets/sets/*', {
+const setBackgrounds = import.meta.glob<string>('../assets/set-banners/*/*', {
   eager: true,
   query: '?url',
   import: 'default',
