@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: "PT Sans", sans-serif;
+  --font-heading: "Oxanium", sans-serif;
   --color-neutral-50: #0f172a;
   --color-neutral-100: #1e293b;
   --color-neutral-200: #334155;
@@ -12,6 +14,19 @@
   --color-neutral-800: #e2e8f0;
   --color-neutral-900: #f1f5f9;
   --color-neutral-950: #e2e8f0;
+}
+
+body {
+  font-family: "PT Sans", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Oxanium", sans-serif;
 }
 
 html {

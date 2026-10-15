@@ -150,9 +150,9 @@ function SeriesSection({
             imageClassName="max-h-[80%] max-w-[90%] transition-transform duration-300 group-hover:scale-105"
           />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[1.625rem] font-black leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] transition-colors group-hover:text-amber-300 sm:text-[2.125rem]">
+            <h2 className="m-0 block truncate text-[1.625rem] font-semibold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] transition-colors group-hover:text-amber-300 sm:text-[2.125rem]">
               {serie.name}
-            </span>
+            </h2>
             <span className="mt-2 block text-sm text-slate-300">
               {seriesDetails
                 ? `${seriesDetails.sets.length} ${seriesDetails.sets.length === 1 ? 'set' : 'sets'}`

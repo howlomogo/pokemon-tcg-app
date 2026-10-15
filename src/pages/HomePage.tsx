@@ -1,9 +1,15 @@
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import heroBanner from '../assets/hero-banner.png';
 
 export default function HomePage({ seriesCount }: { seriesCount: number }) {
   return (
-    <section className="relative isolate overflow-hidden rounded-[2rem] border border-slate-700 bg-slate-900 px-6 py-12 text-slate-100 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
+    <section
+      className="relative isolate overflow-hidden rounded-[2rem] border border-slate-700 bg-slate-900 bg-cover bg-center px-6 py-12 text-slate-100 sm:px-10 sm:py-16 lg:px-16 lg:py-20"
+      style={{
+        backgroundImage: `linear-gradient(90deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.84) 48%, rgba(15, 23, 42, 0.66) 100%), url("${heroBanner}")`,
+      }}
+    >
       <div className="pointer-events-none absolute -right-20 -top-24 -z-10 h-80 w-80 rounded-full bg-amber-400/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 left-1/3 -z-10 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
 
