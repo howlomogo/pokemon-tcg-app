@@ -117,7 +117,7 @@ function SeriesSection({ serie }: { serie: SerieList[number] }) {
         <SetArtwork
           set={serie}
           className="flex h-14 w-20 shrink-0 items-center justify-center rounded-xl bg-neutral-950 p-2 sm:h-16 sm:w-24"
-          imageClassName="max-h-full max-w-full transition-transform duration-300 group-hover:scale-105"
+          imageClassName="max-h-[60%] max-w-[80%] transition-transform duration-300 group-hover:scale-105"
         />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-bold text-neutral-100 group-hover:text-amber-300">
@@ -143,7 +143,7 @@ function SeriesSection({ serie }: { serie: SerieList[number] }) {
           ) : error ? (
             <ErrorMessage message={error} />
           ) : seriesDetails?.sets.length ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
               {seriesDetails.sets.map((set) => (
                 <SetCard
                   key={set.id}
@@ -211,7 +211,7 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
         <SetArtwork
           set={set}
           className="relative z-10 flex h-full w-full items-center justify-center"
-          imageClassName="max-h-full max-w-full transition-transform duration-300 group-hover/set:scale-105"
+          imageClassName="max-h-[60%] max-w-[80%] transition-transform duration-300 group-hover/set:scale-105"
         />
         <span
           className="absolute right-2 top-2 z-20 inline-flex items-center gap-1.5 rounded-full bg-slate-950/50 px-2.5 py-1 text-[10px] font-bold text-slate-100 shadow-sm backdrop-blur-sm"

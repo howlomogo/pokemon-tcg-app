@@ -63,7 +63,7 @@ export default function SeriesPage() {
               key={current.series.id}
               set={current.series}
               className="flex h-32 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 px-6 sm:w-56"
-              imageClassName="max-h-24 max-w-full"
+              imageClassName="max-h-[4.8rem] max-w-[80%]"
             />
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
@@ -83,7 +83,7 @@ export default function SeriesPage() {
             <p className="mt-1 text-sm text-neutral-400">Choose a set to browse its complete card list.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {current.series.sets.map((set) => (
               <Link
                 key={set.id}
@@ -96,7 +96,7 @@ export default function SeriesPage() {
                     key={set.id}
                     set={set}
                     className="relative z-10 flex h-full w-full items-center justify-center"
-                    imageClassName="max-h-full max-w-full transition-transform duration-300 group-hover:scale-105"
+                    imageClassName="max-h-[60%] max-w-[80%] transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 <div className="p-4">
