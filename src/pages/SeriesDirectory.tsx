@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, ChevronDown, Search } from 'lucide-react';
+import { ArrowDownWideNarrow, CalendarDays, ChevronDown, Search } from 'lucide-react';
 import type { Serie, SerieList, SetResume } from '@tcgdex/sdk';
 import { Link } from 'react-router-dom';
-import { ErrorMessage, LoadingMessage, SetArtwork, SetBackground } from '../components/shared';
+import {
+  ErrorMessage,
+  LoadingMessage,
+  SeriesBackground,
+  SetArtwork,
+  SetBackground,
+} from '../components/shared';
 import { getSerie, getSetReleaseDate } from '../services/tcgdex';
 
 export default function SeriesDirectory({
@@ -15,7 +21,9 @@ export default function SeriesDirectory({
   error: string | null;
 }) {
   const [search, setSearch] = useState('');
-  const visibleSeries = series.filter((serie) =>
+  const [sortOrder, setSortOrder] = useState<'oldest' | 'newest'>('newest');
+  const orderedSeries = sortOrder === 'oldest' ? series : [...series].reverse();
+  const visibleSeries = orderedSeries.filter((serie) =>
     serie.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
   );
 
@@ -31,21 +39,32 @@ export default function SeriesDirectory({
             Browse Pokémon TCG by series, then choose an expansion to see its cards.
           </p>
         </div>
-        <label className="relative block w-full sm:max-w-xs">
-          <span className="sr-only">Search series</span>
-          <Search
-            size={17}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search series..."
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
-          />
-        </label>
+        <div className="flex w-full gap-2 sm:w-auto sm:items-center">
+          <label className="relative block min-w-0 flex-1 sm:w-64 sm:flex-none">
+            <span className="sr-only">Search series</span>
+            <Search
+              size={17}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search series..."
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-900 py-3 pl-10 pr-4 text-sm text-neutral-100 outline-none transition placeholder:text-neutral-500 focus:border-amber-400"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => setSortOrder((order) => (order === 'oldest' ? 'newest' : 'oldest'))}
+            aria-label={`Switch to ${sortOrder === 'oldest' ? 'newest' : 'oldest'} first`}
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 text-sm font-medium text-neutral-300 transition hover:border-neutral-600 hover:text-neutral-100"
+          >
+            <ArrowDownWideNarrow size={16} aria-hidden="true" />
+            {sortOrder === 'oldest' ? 'Oldest first' : 'Newest first'}
+          </button>
+        </div>
       </div>
 
       {!loading && !error && (
@@ -60,7 +79,7 @@ export default function SeriesDirectory({
       ) : error ? (
         <ErrorMessage message={error} />
       ) : visibleSeries.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-5">
           {visibleSeries.map((serie) => (
             <SeriesSection
               key={serie.id}
@@ -112,28 +131,31 @@ function SeriesSection({ serie }: { serie: SerieList[number] }) {
         type="button"
         aria-expanded={isOpen}
         onClick={toggleOpen}
-        className="group flex w-full items-center gap-4 p-4 text-left transition hover:bg-neutral-800/60 sm:p-5"
+        className="group relative isolate flex w-full items-center gap-5 px-5 py-6 text-left transition hover:bg-neutral-800/60 sm:gap-6 sm:px-7 sm:py-8"
       >
-        <SetArtwork
-          set={serie}
-          className="flex h-14 w-20 shrink-0 items-center justify-center rounded-xl bg-neutral-950 p-2 sm:h-16 sm:w-24"
-          imageClassName="max-h-[60%] max-w-[80%] transition-transform duration-300 group-hover:scale-105"
-        />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-bold text-neutral-100 group-hover:text-amber-300">
-            {serie.name}
+        <SeriesBackground seriesId={serie.id} />
+        <span className="relative z-10 flex w-full items-center gap-4">
+          <SetArtwork
+            set={serie}
+            className="flex h-28 w-44 shrink-0 items-center justify-center sm:h-32 sm:w-52"
+            imageClassName="max-h-[80%] max-w-[90%] transition-transform duration-300 group-hover:scale-105"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[1.625rem] font-black leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] transition-colors group-hover:text-amber-300 sm:text-[2.125rem]">
+              {serie.name}
+            </span>
+            <span className="mt-2 block text-sm text-slate-300">
+              {seriesDetails
+                ? `${seriesDetails.sets.length} ${seriesDetails.sets.length === 1 ? 'set' : 'sets'}`
+                : 'Expand to browse sets'}
+            </span>
           </span>
-          <span className="mt-1 block text-xs text-neutral-500">
-            {seriesDetails
-              ? `${seriesDetails.sets.length} ${seriesDetails.sets.length === 1 ? 'set' : 'sets'}`
-              : 'Expand to browse sets'}
-          </span>
+          <ChevronDown
+            size={26}
+            aria-hidden="true"
+            className={`shrink-0 text-white transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          />
         </span>
-        <ChevronDown
-          size={20}
-          aria-hidden="true"
-          className={`shrink-0 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-        />
       </button>
 
       {isOpen && (
@@ -226,7 +248,7 @@ function SetCard({ set, seriesId }: { set: SetResume; seriesId: string }) {
         </span>
       </div>
       <div className="p-4">
-        <h3 className="truncate font-bold text-neutral-100 group-hover/set:text-amber-300">
+        <h3 className="truncate font-bold tracking-wide text-neutral-100 group-hover/set:text-amber-300">
           {set.name}
         </h3>
         <p className="mt-1 text-xs text-neutral-500">{set.cardCount.total} cards</p>

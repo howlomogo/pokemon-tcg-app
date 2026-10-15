@@ -23,22 +23,44 @@ const getSetBackgroundUrl = (setId: string) => {
   return matchingAsset?.[1];
 };
 
-export function SetBackground({
-  setId,
-  variant = 'card',
-}: {
-  setId: string;
-  variant?: 'card' | 'title';
-}) {
-  const imageUrl = getSetBackgroundUrl(setId);
-  if (!imageUrl) return null;
+const getSeriesBackgroundUrl = (seriesId: string) => {
+  const normalizedSeriesId = normalizeSetId(seriesId);
+  const seriesAssets = Object.entries(setBackgrounds)
+    .filter(([path]) => normalizeSetId(path.split('/').at(-2) ?? '') === normalizedSeriesId)
+    .sort(([pathA], [pathB]) => pathA.localeCompare(pathB));
+  const firstSetAsset = seriesAssets.find(([path]) => {
+    const filename = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? '';
+    const normalizedFilename = normalizeSetId(filename);
+    const setNumber = normalizedFilename.slice(normalizedSeriesId.length);
+    return normalizedFilename.startsWith(normalizedSeriesId) && /^\d+$/.test(setNumber) && Number(setNumber) === 1;
+  });
 
+  return firstSetAsset?.[1] ?? seriesAssets[0]?.[1];
+};
+
+type BackgroundVariant = 'card' | 'title' | 'series';
+
+function BackgroundLayers({
+  imageUrl,
+  variant,
+}: {
+  imageUrl: string;
+  variant: BackgroundVariant;
+}) {
   return (
     <>
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
-          variant === 'title' ? 'opacity-45' : 'opacity-40 group-hover/set:opacity-55'
+        className={`pointer-events-none absolute inset-0 scale-[1.02] bg-cover bg-center ${
+          variant === 'series'
+            ? 'blur-[2px] brightness-[0.9] saturate-[1.4]'
+            : 'blur-[1px]'
+        } transition-opacity duration-300 ${
+          variant === 'title'
+            ? 'opacity-45'
+            : variant === 'series'
+              ? 'opacity-45'
+              : 'opacity-40 group-hover/set:opacity-55'
         }`}
         style={{ backgroundImage: `url("${imageUrl}")` }}
       />
@@ -47,7 +69,9 @@ export function SetBackground({
         className={`pointer-events-none absolute inset-0 bg-gradient-to-t ${
           variant === 'title'
             ? 'from-slate-950/80 via-slate-950/50 to-slate-900/30'
-            : 'from-slate-950/85 via-slate-950/55 to-slate-900/35'
+            : variant === 'series'
+              ? 'from-slate-950/90 via-slate-950/75 to-slate-900/60'
+              : 'from-slate-950/85 via-slate-950/55 to-slate-900/35'
         }`}
       />
       {variant === 'title' && (
@@ -62,6 +86,26 @@ export function SetBackground({
       )}
     </>
   );
+}
+
+export function SetBackground({
+  setId,
+  variant = 'card',
+}: {
+  setId: string;
+  variant?: 'card' | 'title';
+}) {
+  const imageUrl = getSetBackgroundUrl(setId);
+  if (!imageUrl) return null;
+
+  return <BackgroundLayers imageUrl={imageUrl} variant={variant} />;
+}
+
+export function SeriesBackground({ seriesId }: { seriesId: string }) {
+  const imageUrl = getSeriesBackgroundUrl(seriesId);
+  if (!imageUrl) return null;
+
+  return <BackgroundLayers imageUrl={imageUrl} variant="series" />;
 }
 
 export function MatchupDetails({
