@@ -41,7 +41,7 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
   const [selectedRarities, setSelectedRarities] = useState<string[]>([]);
   const setFilterRef = useRef<HTMLDetailsElement>(null);
   const rarityFilterRef = useRef<HTMLDetailsElement>(null);
-  const [sortOption, setSortOption] = useState<PriceSort>('id-asc');
+  const [sortOption, setSortOption] = useState<PriceSort>('cardmarket-desc');
   const [gridColumns, setGridColumns] = useState<3 | 4 | 5 | 6 | null>(null);
   const current = result?.ids.join('|') === binderIds.join('|') ? result : null;
 
@@ -225,19 +225,6 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
 
   return (
     <section>
-      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
-            Your saved cards
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">Collection</h1>
-          <p className="mt-2 text-sm text-neutral-400">
-            {binderIds.length} {binderIds.length === 1 ? 'card' : 'cards'} in your collection
-          </p>
-        </div>
-        <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
-      </div>
-
       {binderIds.length === 0 ? (
         <>
           <section aria-label="Collection value" className="relative isolate mb-7 overflow-hidden rounded-3xl bg-white p-5 sm:p-7">
@@ -246,6 +233,9 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-100">Collection value</p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-100">Your collection at a glance</h2>
                 <p className="mt-2 text-sm text-neutral-400">Add cards to your collection to see their estimated total value and your most valuable card here.</p>
+                <div className="mt-4">
+                  <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
+                </div>
               </div>
             </div>
           </section>
@@ -270,9 +260,22 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
         <>
           <div className="mb-7 grid gap-4 sm:grid-cols-2">
               <section aria-label="Estimated collection total" className="rounded-3xl bg-white p-5 sm:p-7">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-100">Collection value</p>
-                <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-100">Estimated total</h2>
-                <p className="mt-1 text-4xl font-bold text-neutral-100">{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR' }).format(valueSummary.cardmarketTotal)}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-100">Collection value</p>
+                  <StorageActions binderIds={binderIds} setBinderIds={setBinderIds} />
+                </div>
+                <div className="mt-2 flex items-end justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-black tracking-tight text-neutral-100">Estimated total</h2>
+                    <p className="mt-1 text-3xl font-bold text-neutral-100 sm:text-4xl">{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR' }).format(valueSummary.cardmarketTotal)}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-xs text-neutral-400">
+                      <span className="block text-4xl font-black leading-none tabular-nums text-amber-400 sm:text-5xl">{current.cards.length}</span>
+                      cards in your collection
+                    </p>
+                  </div>
+                </div>
                 <div className="mt-5 border-t border-neutral-800 pt-4">
                   <p className="text-sm font-bold text-neutral-100">Recent price history</p>
                   {valueSummary.priceHistory.length > 1 ? (() => {
@@ -322,7 +325,6 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
                         <div className="flex justify-between text-xs text-neutral-400">
                           {points.map((point) => <span key={point.label}>{point.label}</span>)}
                         </div>
-                        <p className="mt-4 text-xs text-neutral-400">Based on available Cardmarket rolling averages; values are estimates.</p>
                       </>
                     );
                   })() : <p className="mt-2 text-sm text-neutral-400">Not enough historical price data yet.</p>}
@@ -337,7 +339,7 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
                       <p className="mt-2 text-2xl font-black tracking-tight text-neutral-100">{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR' }).format(valueSummary.mostValuableCard.price)}</p>
                       <p className="mt-1 text-xs text-neutral-400">Highest average price in your collection</p>
                     </div>
-                    <Link to={`/cards/${encodeURIComponent(valueSummary.mostValuableCard.card.id)}`} className="h-64 w-44 shrink-0 overflow-hidden rounded-xl sm:h-80 sm:w-56" aria-label={`View ${valueSummary.mostValuableCard.card.name}`}>
+                    <Link to={`/cards/${encodeURIComponent(valueSummary.mostValuableCard.card.id)}`} className="h-60 w-40 shrink-0 overflow-hidden rounded-xl sm:h-72 sm:w-52" aria-label={`View ${valueSummary.mostValuableCard.card.name}`}>
                       {valueSummary.mostValuableCard.card.image && <img src={`${valueSummary.mostValuableCard.card.image}/high.webp`} alt={valueSummary.mostValuableCard.card.name} className="h-full w-full object-contain drop-shadow-xl" loading="lazy" />}
                     </Link>
                   </>
@@ -383,19 +385,19 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
               </div>
               <ul className="grid gap-y-4">
                 {raritySummary.map(({ rarity, count }) => (
-                  <li key={rarity} className="grid grid-cols-[minmax(0,1fr)_minmax(2rem,1.5fr)_2rem] items-center gap-3 text-sm">
-                    <span className="truncate font-medium text-neutral-100" title={rarity}>{rarity}</span>
-                    <div
-                      role="progressbar"
-                      aria-label={`${rarity} cards`}
-                      aria-valuemin={0}
-                      aria-valuemax={maxRarityCount}
-                      aria-valuenow={count}
-                      className="h-2.5 overflow-hidden rounded-full bg-neutral-800"
+                  <li key={rarity}>
+                    <button
+                      type="button"
+                      aria-pressed={selectedRarities.includes(rarity)}
+                      onClick={() => setSelectedRarities((selected) => selected.includes(rarity) ? [] : [rarity])}
+                      className="grid w-full grid-cols-[minmax(0,1fr)_minmax(2rem,1.5fr)_2rem] items-center gap-3 text-left text-sm hover:opacity-80 focus-visible:outline focus-visible:outline-amber-400"
                     >
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / maxRarityCount) * 100}%` }} />
-                    </div>
-                    <span className="text-right tabular-nums text-neutral-400">{count}</span>
+                      <span className="truncate font-medium text-neutral-100" title={rarity}>{rarity}</span>
+                      <div role="progressbar" aria-label={`${rarity} cards`} aria-valuemin={0} aria-valuemax={maxRarityCount} aria-valuenow={count} className="h-2.5 overflow-hidden rounded-full bg-neutral-800">
+                        <div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / maxRarityCount) * 100}%` }} />
+                      </div>
+                      <span className="text-right tabular-nums text-neutral-400">{count}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -410,19 +412,19 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
               </div>
               <ul className="grid gap-y-4">
                 {collectionSets.map(({ id, name, count }) => (
-                  <li key={id} className="grid grid-cols-[minmax(0,1fr)_minmax(2rem,1.5fr)_2rem] items-center gap-3 text-sm">
-                    <span className="truncate font-medium text-neutral-100" title={name}>{name}</span>
-                    <div
-                      role="progressbar"
-                      aria-label={`${name} cards`}
-                      aria-valuemin={0}
-                      aria-valuemax={maxSetCount}
-                      aria-valuenow={count}
-                      className="h-2.5 overflow-hidden rounded-full bg-neutral-800"
+                  <li key={id}>
+                    <button
+                      type="button"
+                      aria-pressed={selectedSets.includes(id)}
+                      onClick={() => setSelectedSets((selected) => selected.includes(id) ? [] : [id])}
+                      className="grid w-full grid-cols-[minmax(0,1fr)_minmax(2rem,1.5fr)_2rem] items-center gap-3 text-left text-sm hover:opacity-80 focus-visible:outline focus-visible:outline-amber-400"
                     >
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / maxSetCount) * 100}%` }} />
-                    </div>
-                    <span className="text-right tabular-nums text-neutral-400">{count}</span>
+                      <span className="truncate font-medium text-neutral-100" title={name}>{name}</span>
+                      <div role="progressbar" aria-label={`${name} cards`} aria-valuemin={0} aria-valuemax={maxSetCount} aria-valuenow={count} className="h-2.5 overflow-hidden rounded-full bg-neutral-800">
+                        <div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / maxSetCount) * 100}%` }} />
+                      </div>
+                      <span className="text-right tabular-nums text-neutral-400">{count}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -485,14 +487,14 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
             </label>
             <details ref={setFilterRef} className="group relative w-full min-w-0 xl:w-36">
               <summary aria-label="Filter cards by set" className="flex min-w-0 cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 text-sm text-neutral-100 outline-none focus:border-amber-400 [&::-webkit-details-marker]:hidden">
-                <span className="min-w-0 truncate">{selectedSets.length === 0 ? `All sets (${current.cards.length})` : `${selectedSets.length} sets selected`}</span>
+                <span className="min-w-0 truncate">{selectedSets.length === 0 ? `All sets (${collectionSets.length})` : `${selectedSets.length} ${selectedSets.length === 1 ? 'set' : 'sets'} selected`}</span>
                 <ListFilter size={16} className="shrink-0 text-neutral-400" aria-hidden="true" />
               </summary>
               <fieldset className="absolute left-0 top-full z-20 mt-2 max-h-64 w-full min-w-56 overflow-y-auto rounded-xl border border-neutral-700 bg-neutral-900 p-3 shadow-xl">
                 <legend className="sr-only">Filter cards by set</legend>
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm text-neutral-300 hover:bg-neutral-800">
                   <input type="checkbox" checked={selectedSets.length === 0} onChange={() => setSelectedSets([])} className="accent-amber-400" />
-                  All sets ({current.cards.length})
+                  All sets ({collectionSets.length})
                 </label>
                 {collectionSets.map((set) => (
                   <label key={set.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm text-neutral-300 hover:bg-neutral-800">
@@ -510,14 +512,14 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
             </details>
             <details ref={rarityFilterRef} className="group relative w-full min-w-0 xl:w-36">
               <summary aria-label="Filter cards by rarity" className="flex min-w-0 cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 text-sm text-neutral-100 outline-none focus:border-amber-400 [&::-webkit-details-marker]:hidden">
-                <span className="min-w-0 truncate">{selectedRarities.length === 0 ? `All rarities (${current.cards.length})` : `${selectedRarities.length} rarities selected`}</span>
+                <span className="min-w-0 truncate">{selectedRarities.length === 0 ? `All rarities (${raritySummary.length})` : `${selectedRarities.length} ${selectedRarities.length === 1 ? 'rarity' : 'rarities'} selected`}</span>
                 <ListFilter size={16} className="shrink-0 text-neutral-400" aria-hidden="true" />
               </summary>
               <fieldset className="absolute left-0 top-full z-20 mt-2 max-h-64 w-full min-w-56 overflow-y-auto rounded-xl border border-neutral-700 bg-neutral-900 p-3 shadow-xl">
                 <legend className="sr-only">Filter cards by rarity</legend>
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm text-neutral-300 hover:bg-neutral-800">
                   <input type="checkbox" checked={selectedRarities.length === 0} onChange={() => setSelectedRarities([])} className="accent-amber-400" />
-                  All rarities ({current.cards.length})
+                  All rarities ({raritySummary.length})
                 </label>
                 {raritySummary.map(({ rarity, count }) => (
                   <label key={rarity} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm text-neutral-300 hover:bg-neutral-800">

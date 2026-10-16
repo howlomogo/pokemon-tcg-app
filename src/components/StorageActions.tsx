@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, Download, Upload } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 
 interface StorageActionsProps {
   binderIds: string[];
@@ -7,11 +7,6 @@ interface StorageActionsProps {
 }
 
 export default function StorageActions({ binderIds, setBinderIds }: StorageActionsProps) {
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert("🔗 Shareable binder link copied to your clipboard!");
-  };
-
   const exportToJson = () => {
     if (binderIds.length === 0) return alert("Your binder is completely empty!");
     const blob = new Blob([JSON.stringify(binderIds, null, 2)], { type: 'application/json' });
@@ -48,16 +43,13 @@ export default function StorageActions({ binderIds, setBinderIds }: StorageActio
 
   return (
     <div className="flex flex-wrap gap-2">
-      <button onClick={copyShareLink} className={actionStyle}>
-        <Share2 size={14} className="text-amber-400" /> Share Link
-      </button>
-      <button onClick={exportToJson} className={actionStyle}>
-        <Download size={14} className="text-emerald-400" /> Export JSON
-      </button>
       <label className={actionStyle}>
         <Upload size={14} className="text-sky-400" /> Import JSON
         <input type="file" accept=".json" onChange={importFromJson} className="hidden" />
       </label>
+      <button onClick={exportToJson} className={actionStyle}>
+        <Download size={14} className="text-emerald-400" /> Export JSON
+      </button>
     </div>
   );
 }
