@@ -32,8 +32,7 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
         const cards = await Promise.all(ids.map((id) => getCard(id)));
         if (!isMounted) return;
 
-        const missingCard = cards.find((card) => !card);
-        if (missingCard === null) {
+        if (cards.some((card) => card === null)) {
           setResult({
             ids,
             error: 'One or more saved cards could not be found. Remove the unavailable cards and try again.',
@@ -41,7 +40,10 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
           return;
         }
 
-        setResult({ ids, cards: cards.filter((card): card is CardWithDetails => card !== null) });
+        setResult({
+          ids,
+          cards: cards.filter((card): card is CardWithDetails => card !== null),
+        });
       } catch (error) {
         if (isMounted) {
           setResult({
@@ -92,7 +94,12 @@ export default function CollectionPage({ binderIds, setBinderIds }: CollectionPa
       ) : current.error ? (
         <ErrorMessage message={current.error} />
       ) : current.cards ? (
-        <CardGrid cards={current.cards} binderIds={binderIds} setBinderIds={setBinderIds} />
+        <CardGrid
+          cards={current.cards}
+          binderIds={binderIds}
+          setBinderIds={setBinderIds}
+          showPrices
+        />
       ) : null}
     </section>
   );

@@ -1,13 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { CardPricing } from '../services/tcgdex';
 import type { CardBrief } from '../types/pokemon';
 
+type CardGridItem = CardBrief & {
+  pricing?: CardPricing | null;
+};
+
 interface CardGridProps {
-  cards: CardBrief[];
+  cards: CardGridItem[];
   binderIds: string[];
   setBinderIds: React.Dispatch<React.SetStateAction<string[]>>;
   columns?: 3 | 4 | 5 | 6;
+  showPrices?: boolean;
+}
+
+function getAveragePriceLabels(pricing?: CardPricing | null) {
+  if (!pricing) return [];
+
+  const labels: string[] = [];
+  const cardmarket = pricing.cardmarket;
+  if (cardmarket && typeof cardmarket === 'object' && !Array.isArray(cardmarket)) {
+    const averageKey = ['avg', 'avg7', 'avg30', 'avg1', 'avg-holo', 'avg1-holo', 'avg7-holo', 'avg30-holo']
+      .find((key) => typeof cardmarket[key] === 'number');
+    const averageValue = averageKey ? cardmarket[averageKey] : undefined;
+    if (typeof averageValue === 'number') {
+      labels.push(
+        `Cardmarket avg: ${new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'EUR',
+          currencyDisplay: 'narrowSymbol',
+        }).format(averageValue)}`
+      );
+    }
+  }
+
+  const tcgplayer = pricing.tcgplayer;
+  if (tcgplayer && typeof tcgplayer === 'object' && !Array.isArray(tcgplayer)) {
+    const priceGroups = Object.entries(tcgplayer)
+      .filter((entry): entry is [string, CardPricing] =>
+        typeof entry[1] === 'object' && entry[1] !== null && !Array.isArray(entry[1])
+      )
+      .sort(([first], [second]) => Number(second.toLowerCase() === 'normal') - Number(first.toLowerCase() === 'normal'));
+    const marketPrice = priceGroups
+      .map(([, values]) => values.marketPrice)
+      .find((value): value is number => typeof value === 'number');
+
+    if (marketPrice !== undefined) {
+      labels.push(
+        `TCGplayer market: ${new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          currencyDisplay: 'narrowSymbol',
+        }).format(marketPrice)}`
+      );
+    }
+  }
+
+  return labels;
 }
 
 const gridColumnClasses: Record<NonNullable<CardGridProps['columns']>, string> = {
@@ -17,7 +68,13 @@ const gridColumnClasses: Record<NonNullable<CardGridProps['columns']>, string> =
   6: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6',
 };
 
-export default function CardGrid({ cards, binderIds, setBinderIds, columns }: CardGridProps) {
+export default function CardGrid({
+  cards,
+  binderIds,
+  setBinderIds,
+  columns,
+  showPrices = false,
+}: CardGridProps) {
   const [collectionNotice, setCollectionNotice] = useState<{
     cardId: string;
     action: 'added' | 'removed';
@@ -62,6 +119,7 @@ export default function CardGrid({ cards, binderIds, setBinderIds, columns }: Ca
         const cardNumber = /^\d+$/.test(card.localId)
           ? card.localId.padStart(3, '0')
           : card.localId;
+        const averagePriceLabels = getAveragePriceLabels(card.pricing);
 
         return (
           <div 
@@ -121,6 +179,15 @@ export default function CardGrid({ cards, binderIds, setBinderIds, columns }: Ca
                 <span className="truncate">{card.name}</span>
                 <span className="ml-auto shrink-0 text-[10px] font-medium text-neutral-500">#{cardNumber}</span>
               </Link>
+              {showPrices && (
+                averagePriceLabels.length > 0 ? (
+                  <div className="space-y-0.5 text-[11px] font-medium text-emerald-300">
+                    {averagePriceLabels.map((label) => <p key={label}>{label}</p>)}
+                  </div>
+                ) : (
+                  <p className="text-[11px] font-medium text-neutral-500">Price unavailable</p>
+                )
+              )}
             </div>
           </div>
         );

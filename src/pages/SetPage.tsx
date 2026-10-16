@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowDownWideNarrow, ArrowLeft, Grid2X2, ListFilter, Search } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowLeft, Grid2X2, Heart, ListFilter, Search } from 'lucide-react';
 import type { Set as TcgSet } from '@tcgdex/sdk';
 import { Link, useParams } from 'react-router-dom';
 import CardGrid from '../components/CardGrid';
@@ -164,6 +164,23 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
 
       return sortOption === '' || sortOption.endsWith('asc') ? comparison : -comparison;
     });
+  const filteredCardIds = filteredCards?.map((card) => card.id) ?? [];
+  const allFilteredCardsOwned =
+    filteredCardIds.length > 0 && filteredCardIds.every((id) => binderIds.includes(id));
+
+  const toggleFilteredCardsInCollection = () => {
+    if (filteredCardIds.length === 0) return;
+
+    setBinderIds((currentIds) => {
+      const allAreOwned = filteredCardIds.every((id) => currentIds.includes(id));
+      if (allAreOwned) {
+        const filteredIds = new Set(filteredCardIds);
+        return currentIds.filter((id) => !filteredIds.has(id));
+      }
+
+      return [...new Set([...currentIds, ...filteredCardIds])];
+    });
+  };
 
   return (
     <section>
@@ -210,7 +227,7 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
       </div>
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-start">
         {current?.set && (
-          <div className="grid w-full gap-3 sm:grid-cols-[minmax(12rem,1fr)_auto_auto_auto_auto]">
+          <div className="grid w-full gap-3 sm:grid-cols-[minmax(12rem,1fr)_auto_auto_auto_auto] md:grid-cols-[minmax(12rem,1fr)_auto_auto_auto_auto_auto]">
             <div
               className="relative"
               onBlur={(event) => {
@@ -304,6 +321,16 @@ export default function SetPage({ binderIds, setBinderIds }: SetPageProps) {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={toggleFilteredCardsInCollection}
+              disabled={filteredCardIds.length === 0}
+              aria-label={allFilteredCardsOwned ? 'Remove all' : 'Add all'}
+              className="inline-flex w-36 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-3 text-sm font-medium text-neutral-200 transition hover:border-amber-400/60 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Heart size={15} fill={allFilteredCardsOwned ? 'currentColor' : 'none'} aria-hidden="true" />
+              {allFilteredCardsOwned ? 'Remove all' : 'Add all'}
+            </button>
             <label>
               <span className="sr-only">Filter cards by category</span>
               <span className="relative block w-full">
