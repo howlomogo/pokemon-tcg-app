@@ -14,29 +14,36 @@ interface CardGridProps {
   setBinderIds: React.Dispatch<React.SetStateAction<string[]>>;
   columns?: 3 | 4 | 5 | 6;
   showPrices?: boolean;
+  priceSource?: 'all' | 'cardmarket';
 }
 
-function getAveragePriceLabels(pricing?: CardPricing | null) {
+type CardPriceItem = {
+  label: string;
+  price: string;
+};
+
+function getAveragePrices(pricing?: CardPricing | null, priceSource: 'all' | 'cardmarket' = 'all'): CardPriceItem[] {
   if (!pricing) return [];
 
-  const labels: string[] = [];
+  const prices: CardPriceItem[] = [];
   const cardmarket = pricing.cardmarket;
   if (cardmarket && typeof cardmarket === 'object' && !Array.isArray(cardmarket)) {
     const averageKey = ['avg', 'avg7', 'avg30', 'avg1', 'avg-holo', 'avg1-holo', 'avg7-holo', 'avg30-holo']
       .find((key) => typeof cardmarket[key] === 'number');
     const averageValue = averageKey ? cardmarket[averageKey] : undefined;
     if (typeof averageValue === 'number') {
-      labels.push(
-        `Cardmarket avg: ${new Intl.NumberFormat('en-US', {
+      prices.push({
+        label: 'Cardmarket avg',
+        price: new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'EUR',
           currencyDisplay: 'narrowSymbol',
-        }).format(averageValue)}`
-      );
+        }).format(averageValue),
+      });
     }
   }
 
-  const tcgplayer = pricing.tcgplayer;
+  const tcgplayer = priceSource === 'all' ? pricing.tcgplayer : undefined;
   if (tcgplayer && typeof tcgplayer === 'object' && !Array.isArray(tcgplayer)) {
     const priceGroups = Object.entries(tcgplayer)
       .filter((entry): entry is [string, CardPricing] =>
@@ -48,17 +55,18 @@ function getAveragePriceLabels(pricing?: CardPricing | null) {
       .find((value): value is number => typeof value === 'number');
 
     if (marketPrice !== undefined) {
-      labels.push(
-        `TCGplayer market: ${new Intl.NumberFormat('en-US', {
+      prices.push({
+        label: 'TCGplayer market',
+        price: new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
           currencyDisplay: 'narrowSymbol',
-        }).format(marketPrice)}`
-      );
+        }).format(marketPrice),
+      });
     }
   }
 
-  return labels;
+  return prices;
 }
 
 const gridColumnClasses: Record<NonNullable<CardGridProps['columns']>, string> = {
@@ -74,6 +82,7 @@ export default function CardGrid({
   setBinderIds,
   columns,
   showPrices = false,
+  priceSource = 'all',
 }: CardGridProps) {
   const [collectionNotice, setCollectionNotice] = useState<{
     cardId: string;
@@ -119,7 +128,7 @@ export default function CardGrid({
         const cardNumber = /^\d+$/.test(card.localId)
           ? card.localId.padStart(3, '0')
           : card.localId;
-        const averagePriceLabels = getAveragePriceLabels(card.pricing);
+        const averagePrices = getAveragePrices(card.pricing, priceSource);
 
         return (
           <div 
@@ -180,12 +189,17 @@ export default function CardGrid({
                 <span className="ml-auto shrink-0 text-[10px] font-medium text-neutral-500">#{cardNumber}</span>
               </Link>
               {showPrices && (
-                averagePriceLabels.length > 0 ? (
-                  <div className="space-y-0.5 text-[11px] font-medium text-emerald-300">
-                    {averagePriceLabels.map((label) => <p key={label}>{label}</p>)}
+                averagePrices.length > 0 ? (
+                  <div className="space-y-1 text-xs font-semibold text-neutral-200">
+                    {averagePrices.map((item) => (
+                      <div key={item.label} className="flex min-w-0 items-baseline gap-1.5">
+                        <span className="truncate">{item.label}</span>
+                        <span className="ml-auto shrink-0 text-right">{item.price}</span>
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] font-medium text-neutral-500">Price unavailable</p>
+                  <p className="text-xs font-semibold text-neutral-500">Price unavailable</p>
                 )
               )}
             </div>
