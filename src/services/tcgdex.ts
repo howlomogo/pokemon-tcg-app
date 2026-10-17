@@ -92,6 +92,57 @@ export const getAllSeries = async () => {
   }
 };
 
+export const getSeriesCardCounts = async (seriesIds: string[], binderIds: string[]) => {
+  try {
+    const series = await Promise.all(seriesIds.map((seriesId) => getSerie(seriesId)));
+    const entries = await Promise.all(
+      series.map(async (serie) => {
+        if (!serie) return null;
+        const firstSet = serie.sets[0];
+        const firstSetDetails = firstSet
+          ? await fetchSetDetails(firstSet.id).catch(() => null)
+          : null;
+        const releaseYear = firstSetDetails?.releaseDate
+          ? Number(firstSetDetails.releaseDate.slice(0, 4))
+          : null;
+        return {
+          serie,
+          releaseYear: releaseYear && Number.isFinite(releaseYear) ? releaseYear : null,
+        };
+      })
+    );
+
+    return entries.reduce<
+      Record<
+        string,
+        { cardCount: number; setCount: number; collectedCount: number; releaseYear: number | null }
+      >
+    >(
+      (counts, entry) => {
+        if (entry) {
+          const { serie, releaseYear } = entry;
+          const cardCount = serie.sets.reduce(
+            (total, set) => total + (set.cardCount?.total ?? 0),
+            0
+          );
+          counts[serie.id] = {
+            cardCount,
+            setCount: serie.sets.length,
+            releaseYear,
+            collectedCount: binderIds.filter((cardId) =>
+              serie.sets.some((set) => cardId.startsWith(`${set.id}-`))
+            ).length,
+          };
+        }
+        return counts;
+      },
+      {}
+    );
+  } catch (error) {
+    handleServiceError(error, 'Failed to retrieve series card counts.');
+  }
+};
+
 // Fetch a Single Series
 export const getSerie = async (serie_id: string) => {
   try {

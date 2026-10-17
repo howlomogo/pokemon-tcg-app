@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ArrowDownWideNarrow, CalendarDays, ChevronDown, Layers3, Search } from 'lucide-react';
+import {
+  ArrowDownWideNarrow,
+  CalendarDays,
+  ChevronDown,
+  Copy,
+  Layers3,
+  Search,
+} from 'lucide-react';
 import type { Serie, SerieList, SetResume } from '@tcgdex/sdk';
 import { Link } from 'react-router-dom';
 import {
@@ -9,7 +16,7 @@ import {
   SetArtwork,
   SetBackground,
 } from '../components/shared';
-import { getSerie, getSetDirectoryData } from '../services/tcgdex';
+import { getSerie, getSeriesCardCounts, getSetDirectoryData } from '../services/tcgdex';
 
 export default function SeriesDirectory({
   series,
@@ -24,6 +31,26 @@ export default function SeriesDirectory({
 }) {
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'oldest' | 'newest'>('newest');
+  const [seriesCounts, setSeriesCounts] = useState<
+    Record<
+      string,
+      { cardCount: number; setCount: number; collectedCount: number; releaseYear: number | null }
+    >
+  >({});
+
+  useEffect(() => {
+    let active = true;
+    void getSeriesCardCounts(series.map((serie) => serie.id), binderIds)
+      .then((counts) => {
+        if (active) setSeriesCounts(counts ?? {});
+      })
+      .catch(() => {
+        // Keep the series directory usable if the separate count request fails.
+      });
+    return () => {
+      active = false;
+    };
+  }, [series, binderIds]);
   const orderedSeries = sortOrder === 'oldest' ? series : [...series].reverse();
   const visibleSeries = orderedSeries.filter((serie) =>
     serie.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
@@ -87,6 +114,7 @@ export default function SeriesDirectory({
               key={serie.id}
               serie={serie}
               binderIds={binderIds}
+              counts={seriesCounts[serie.id]}
             />
           ))}
         </div>
@@ -103,9 +131,16 @@ export default function SeriesDirectory({
 function SeriesSection({
   serie,
   binderIds,
+  counts,
 }: {
   serie: SerieList[number];
   binderIds: string[];
+  counts?: {
+    cardCount: number;
+    setCount: number;
+    collectedCount: number;
+    releaseYear: number | null;
+  };
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [seriesDetails, setSeriesDetails] = useState<Serie | null>(null);
@@ -146,7 +181,7 @@ function SeriesSection({
         <span className="relative z-10 flex w-full items-center gap-4">
           <SetArtwork
             set={serie}
-            className="flex h-28 w-44 shrink-0 items-center justify-center sm:h-32 sm:w-52"
+            className="flex h-20 w-32 shrink-0 items-center justify-center sm:h-32 sm:w-52"
             imageClassName="max-h-[80%] max-w-[90%] transition-transform duration-300 group-hover:scale-105"
           />
           <span className="min-w-0 flex-1">
@@ -154,11 +189,47 @@ function SeriesSection({
               {serie.name}
             </h2>
             <span className="mt-2 block text-sm text-slate-300">
-              {seriesDetails
-                ? `${seriesDetails.sets.length} ${seriesDetails.sets.length === 1 ? 'set' : 'sets'}`
-                : 'Expand to browse sets'}
+              {counts ? (
+                <>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Layers3 size={14} className="text-amber-400" aria-hidden="true" />
+                    {counts.setCount} {counts.setCount === 1 ? 'set' : 'sets'}
+                  </span>
+                  <span className="mx-3" aria-hidden="true">-</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Copy size={14} className="text-amber-400" aria-hidden="true" />
+                    {counts.cardCount.toLocaleString()} cards total
+                  </span>
+                  {counts.releaseYear && (
+                    <>
+                      <span className="mx-3" aria-hidden="true">-</span>
+                      <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays size={14} className="text-amber-400" aria-hidden="true" />
+                      Since {counts.releaseYear}
+                      </span>
+                    </>
+                  )}
+                </>
+              ) : seriesDetails ? (
+                `${seriesDetails.sets.length} ${seriesDetails.sets.length === 1 ? 'set' : 'sets'}`
+              ) : (
+                'Expand to browse sets'
+              )}
             </span>
           </span>
+          {counts && (
+            <span className="relative z-10 shrink-0 text-right tabular-nums drop-shadow-sm">
+              <span className="block text-xl font-extrabold text-amber-300 sm:text-2xl">
+                {counts.cardCount > 0
+                  ? `${Math.round((counts.collectedCount / counts.cardCount) * 100)}%`
+                  : '0%'}
+              </span>
+              <span className="mt-1 block text-xl font-extrabold text-white sm:text-2xl">
+                {counts.collectedCount.toLocaleString()}/{counts.cardCount.toLocaleString()}
+              </span>
+              <span className="mt-1 block text-xs font-normal text-slate-300">collected</span>
+            </span>
+          )}
           <ChevronDown
             size={26}
             aria-hidden="true"
