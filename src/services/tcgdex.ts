@@ -1,9 +1,7 @@
-import MemoryCache from '@cachex/memory';
 import TCGdex, { Query } from '@tcgdex/sdk';
 import type { Card, Set as TCGSet } from '@tcgdex/sdk';
 
 const tcgdex = new TCGdex('en');
-tcgdex.setCache(new MemoryCache());
 
 // Exclude sets with minimal or no information
 const excludedSeriesIds = new Set(['misc', 'tk', 'mc', 'tcgp']);
